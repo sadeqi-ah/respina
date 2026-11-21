@@ -33,3 +33,10 @@ class ServiceFactory(factory.django.DjangoModelFactory):
     customer = factory.SubFactory(CustomerFactory)
     name = factory.Sequence(lambda n: f"service-{n}")
     service_type = ServiceType.CLOUD_SERVER
+
+
+def access_token_for(user) -> str:
+    """A real RS256 access token (with role/customer_id claims) for `user`."""
+    from apps.accounts.serializers import TokenObtainPairSerializer
+
+    return str(TokenObtainPairSerializer.get_token(user).access_token)

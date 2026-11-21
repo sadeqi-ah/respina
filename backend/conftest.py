@@ -3,13 +3,21 @@ from django.core.cache import cache
 from rest_framework.test import APIClient
 
 from apps.accounts.models import Role
-from apps.accounts.serializers import TokenObtainPairSerializer
-from apps.core.tests.factories import CustomerFactory, UserFactory
+from apps.core.tests.factories import CustomerFactory, UserFactory, access_token_for
 
 
 @pytest.fixture(autouse=True)
 def _fast_password_hasher(settings):
     settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+
+@pytest.fixture(autouse=True)
+def _plain_static_storage(settings):
+    # The manifest storage needs `collectstatic`, which only runs in the image build.
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
 
 
 @pytest.fixture(autouse=True)
@@ -35,10 +43,6 @@ def customer_user(db):
     user = UserFactory(role=Role.CUSTOMER, email="owner@example.com")
     CustomerFactory(user=user)
     return user
-
-
-def access_token_for(user) -> str:
-    return str(TokenObtainPairSerializer.get_token(user).access_token)
 
 
 @pytest.fixture

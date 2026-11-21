@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "drf_spectacular",
+    "drf_spectacular_sidecar",
     # local
     "apps.core",
     "apps.accounts",
@@ -156,7 +157,14 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Customers, services and service status management.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Swagger UI assets ship with the image (served by whitenoise), not from a CDN.
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "ServiceStatusEnum": "apps.cloud.models.ServiceStatus",
+        "ServiceTypeEnum": "apps.cloud.models.ServiceType",
+    },
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
         "apps.core.schema.add_error_envelope",
