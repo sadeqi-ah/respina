@@ -2,6 +2,7 @@ import { apiFetch } from "@/lib/api-client";
 import type { Customer, Page } from "@/types/api";
 
 import { PAGE_SIZE, type ListParams } from "./params";
+import type { CustomerValues } from "./schemas";
 
 export function listCustomers(params: ListParams, signal?: AbortSignal): Promise<Page<Customer>> {
   const query = new URLSearchParams({
@@ -11,4 +12,8 @@ export function listCustomers(params: ListParams, signal?: AbortSignal): Promise
   });
   if (params.search) query.set("search", params.search);
   return apiFetch<Page<Customer>>(`customers?${query}`, { signal });
+}
+
+export function createCustomer(values: CustomerValues): Promise<Customer> {
+  return apiFetch<Customer>("customers", { method: "POST", body: values });
 }

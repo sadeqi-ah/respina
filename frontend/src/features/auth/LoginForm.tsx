@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ApiError } from "@/lib/api-error";
+import { applyApiError } from "@/lib/form-errors";
 import { safeNext } from "@/lib/safe-next";
-import { translateError, translateFieldError } from "@/lib/translate-error";
 
 import { makeLoginSchema, type LoginValues } from "./schemas";
 
@@ -51,12 +51,7 @@ export function LoginForm({ next }: { next: string | null }) {
       router.refresh();
     } catch (error) {
       const apiError = error instanceof ApiError ? error : ApiError.network(error);
-      // Field errors from Django go under their inputs; everything else is a form-level message.
-      for (const field of FIELDS) {
-        const first = apiError.details[field]?.[0];
-        if (first) form.setError(field, { message: translateFieldError(tv, first) });
-      }
-      form.setError("root", { message: translateError(te, apiError) });
+      applyApiError(apiError, FIELDS, form.setError, { errors: te, validation: tv });
     }
   });
 

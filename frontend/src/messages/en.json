@@ -68,6 +68,19 @@
     "noResults": {
       "title": "No customers match",
       "detail": "Nothing matches “{search}”. Try another name, email or phone."
+    },
+    "form": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "phoneHint": "Mobile or landline, e.g. 09121234567 or +989121234567.",
+      "submit": "Create customer",
+      "submitting": "Creating…",
+      "cancel": "Cancel",
+      "created": "{name} was added",
+      "staffOnly": "Only staff can add customers.",
+      "back": "Back to customers"
     }
   },
   "services": {},

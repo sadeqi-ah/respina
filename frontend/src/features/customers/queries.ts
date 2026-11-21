@@ -1,15 +1,18 @@
 "use client";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-import { listCustomers } from "./api";
+import { createCustomer, listCustomers } from "./api";
 import { parseListParams, toQueryString, type ListParams } from "./params";
+import type { CustomerValues } from "./schemas";
 
 export const customerKeys = {
   all: ["customers"] as const,
+  lists: ["customers", "list"] as const,
   list: (params: ListParams) => ["customers", "list", params] as const,
+  detail: (id: number) => ["customers", "detail", id] as const,
 };
 
 export function useCustomers(params: ListParams) {
@@ -37,4 +40,16 @@ export function useListParams() {
   );
 
   return [params, setParams] as const;
+}
+
+/** POST /customers. On success every cached list is stale (new row, new counts) and the detail is seeded. */
+export function useCreateCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (values: CustomerValues) => createCustomer(values),
+    onSuccess: async (customer) => {
+      queryClient.setQueryData(customerKeys.detail(customer.id), customer);
+      await queryClient.invalidateQueries({ queryKey: customerKeys.lists });
+    },
+  });
 }
