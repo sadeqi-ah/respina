@@ -383,10 +383,12 @@ Create request: `{first_name, last_name, email, phone}`. The phone accepts `0912
 | 400 | `validation_error` | Input validation failed. `details` = field → list of `{code, message}`; codes from DRF `ValidationError.get_codes()` (`required`, `invalid`, `unique`, `max_length`, `invalid_phone`, …) |
 | 400 | `invalid_service_id` | (Go) non-numeric or non-positive id |
 | 401 | `not_authenticated` / `token_invalid` | missing / invalid token |
+| 401 | `invalid_credentials` | wrong email or password on `POST /auth/token/` |
 | 403 | `permission_denied` | authenticated, but the role isn't allowed |
 | 404 | `not_found` | missing **or not visible to the caller** |
 | 405 | `method_not_allowed` | |
 | 409 | `invalid_status_transition` / `conflict` | state machine / uniqueness race |
+| 429 | `throttled` | rate limit exceeded (auth endpoints); `Retry-After` header set |
 | 500 | `internal_error` | never exposes stack traces |
 | 503 | `dependency_unavailable` | database unreachable |
 
