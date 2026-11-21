@@ -38,3 +38,13 @@ Layering: **views → serializers (validation) → use_cases (writes) / selector
 W012, W016) and W009 for the placeholder secret key. In a real deployment set a long random
 `DJANGO_SECRET_KEY` and enable `DJANGO_SECURE_SSL_REDIRECT`, `DJANGO_SECURE_COOKIES` and
 `DJANGO_SECURE_HSTS_SECONDS` behind TLS.
+
+## Refresh tokens
+
+Refresh tokens rotate and the old one is blacklisted (`BLACKLIST_AFTER_ROTATION`, ADR-012), so a
+refresh token works exactly once. Every issued refresh token is recorded in the
+`token_blacklist_outstandingtoken` table; prune expired rows periodically:
+
+```bash
+uv run python manage.py flushexpiredtokens
+```
