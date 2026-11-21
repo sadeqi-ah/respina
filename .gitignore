@@ -1,0 +1,51 @@
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+staticfiles/
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Go ---
+/health-service/bin/
+*.test
+*.out
+
+# --- PHP / Composer ---
+vendor/
+.phpunit.cache/
+.phpunit.result.cache
+.php-cs-fixer.cache
+
+# --- IDE / OS ---
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Agent tooling (local overrides only) ---
+.claude/settings.local.json
