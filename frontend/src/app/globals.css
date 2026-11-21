@@ -4,12 +4,32 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Yekan Bakh (fontiran.com, commercial). The file lives in public/fonts/yekanbakh/ and is
+ * gitignored: it needs a web license and must never be committed (see README "Fonts").
+ * Without it the fa stack falls back to Vazirmatn.
+ *
+ * One variable file covers every weight and width. Both axes are declared as @font-face ranges,
+ * so the standard properties drive them: font-weight → wght (100–950), font-stretch → wdth
+ * (62.5%–150%). Use font-* and font-stretch-* utilities, never font-variation-settings.
+ */
+@font-face {
+  font-family: "Yekan Bakh";
+  src:
+    url("/fonts/yekanbakh/YekanBakh-VF.woff2") format("woff2-variations"),
+    url("/fonts/yekanbakh/YekanBakh-VF.woff2") format("woff2");
+  font-weight: 100 950;
+  font-stretch: 62.5% 150%;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--app-font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--app-font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -27,6 +47,8 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -49,72 +71,82 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Palette: Obsidian UI dashboard shell (components/block/dashboard-shell.css). */
+  --app-font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --background: #ffffff;
+  --foreground: #161616;
+  --card: #ffffff;
+  --card-foreground: #161616;
+  --popover: #ffffff;
+  --popover-foreground: #161616;
+  --primary: #2563eb;
+  --primary-foreground: #f9fbff;
+  --secondary: #efefef;
+  --secondary-foreground: #161616;
+  --muted: #efefef;
+  --muted-foreground: #5c5c5c;
+  --accent: #efefef;
+  --accent-foreground: #161616;
+  --destructive: #dc2626;
+  --border: #e7e7e7;
+  --input: #d6d6d6;
+  --ring: #8b8b8b;
+  --success: #16a34a;
+  --warning: #d97706;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #161616;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #f9fbff;
+  --sidebar-accent: #efefef;
+  --sidebar-accent-foreground: #161616;
+  --sidebar-border: #e7e7e7;
+  --sidebar-ring: #8b8b8b;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+}
+
+:root:lang(fa) {
+  --app-font-sans: "Yekan Bakh", var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: #161616;
+  --foreground: #f9fbff;
+  --card: #1e1e1e;
+  --card-foreground: #f9fbff;
+  --popover: #1e1e1e;
+  --popover-foreground: #f9fbff;
+  --primary: #2563eb;
+  --primary-foreground: #f9fbff;
+  --secondary: #2a2a2a;
+  --secondary-foreground: #f9fbff;
+  --muted: #2a2a2a;
+  --muted-foreground: #9a9a9a;
+  --accent: #2a2a2a;
+  --accent-foreground: #f9fbff;
+  --destructive: #dc2626;
+  --border: #232323;
+  --input: #393939;
+  --ring: #676767;
+  --success: #22c55e;
+  --warning: #fbbf24;
+  --sidebar: #161616;
+  --sidebar-foreground: #f9fbff;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #f9fbff;
+  --sidebar-accent: #2a2a2a;
+  --sidebar-accent-foreground: #f9fbff;
+  --sidebar-border: #232323;
+  --sidebar-ring: #676767;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
 }
 
 @layer base {

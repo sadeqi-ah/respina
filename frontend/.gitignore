@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 /test-results/
 /playwright-report/
+
+# Commercial font (fontiran.com license): never commit. See README "Fonts".
+/public/fonts/yekanbakh/

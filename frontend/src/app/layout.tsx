@@ -10,9 +10,10 @@ import { directions } from "@/i18n/config";
 
 import "./globals.css";
 
-// Both fonts set --font-sans; the layout applies the one for the current locale.
-const geist = Geist({ variable: "--font-sans", subsets: ["latin"] });
-const vazirmatn = Vazirmatn({ variable: "--font-sans", subsets: ["arabic", "latin"] });
+// en: Geist. fa: Yekan Bakh (self-hosted, see globals.css) with Vazirmatn as the fallback.
+// Only the current locale's next/font class is applied, so only that font is preloaded.
+const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
+const vazirmatn = Vazirmatn({ variable: "--font-vazirmatn", subsets: ["arabic", "latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export async function generateMetadata(): Promise<Metadata> {
