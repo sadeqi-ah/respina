@@ -3,8 +3,7 @@ from django.core.cache import cache
 from rest_framework.test import APIClient
 
 from apps.accounts.models import Role
-from apps.accounts.serializers import TokenObtainPairSerializer
-from apps.core.tests.factories import CustomerFactory, UserFactory
+from apps.core.tests.factories import CustomerFactory, UserFactory, access_token_for
 
 
 @pytest.fixture(autouse=True)
@@ -35,10 +34,6 @@ def customer_user(db):
     user = UserFactory(role=Role.CUSTOMER, email="owner@example.com")
     CustomerFactory(user=user)
     return user
-
-
-def access_token_for(user) -> str:
-    return str(TokenObtainPairSerializer.get_token(user).access_token)
 
 
 @pytest.fixture
