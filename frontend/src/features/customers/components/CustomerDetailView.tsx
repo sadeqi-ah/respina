@@ -1,11 +1,15 @@
 "use client";
 
+import { AddCircle } from "@duo-icons/react";
 import { useTranslations } from "next-intl";
 import { notFound, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
+import { DashboardButton } from "@/components/block/dashboard-shell";
 import { ErrorState } from "@/components/states/ErrorState";
 import { LoadingState } from "@/components/states/LoadingState";
+import { useMe } from "@/features/auth/queries";
+import { AddServiceDialog } from "@/features/services/components/AddServiceDialog";
 import { ServiceFilterMenus } from "@/features/services/components/ServiceFilterMenus";
 import { ServicesTab } from "@/features/services/components/ServicesTab";
 import {
@@ -40,23 +44,43 @@ function useDetailParams() {
 export function CustomerDetailView({ id }: { id: number }) {
   const t = useTranslations("customers");
   const ts = useTranslations("services");
+  const { data: me } = useMe();
   const customer = useCustomer(id);
   const [params, setParams] = useDetailParams();
+  const [adding, setAdding] = useState(false);
+  const isStaff = me?.role === "staff"; // UX only: the API enforces it
 
   // Invisible and missing customers are both 404 from the API (scoping never leaks with a 403).
   if (customer.error instanceof ApiError && customer.error.status === 404) notFound();
+
+  const addAction = isStaff ? (
+    <DashboardButton variant="primary" size="sm" onClick={() => setAdding(true)}>
+      <AddCircle aria-hidden />
+      {ts("add.title")}
+    </DashboardButton>
+  ) : null;
 
   let body;
   if (customer.isPending) body = <LoadingState />;
   else if (customer.isError) body = <ErrorState error={customer.error} onRetry={() => customer.refetch()} />;
   else if (params.tab === "details") body = <CustomerDetails customer={customer.data} />;
-  else body = <ServicesTab customerId={id} filters={params} onFiltersChange={setParams} addAction={null} />;
+  else
+    body = (
+      <ServicesTab
+        customerId={id}
+        filters={params}
+        onFiltersChange={setParams}
+        isStaff={isStaff}
+        addAction={addAction}
+      />
+    );
 
   return (
     <AppShell
       title={customer.data?.full_name ?? t("title")}
       status={customer.data ? ts("count", { count: customer.data.services_count }) : undefined}
       statusTone="neutral"
+      headerActions={addAction}
       tabs={TABS.map((tab) => ({ value: tab, label: t(`tabs.${tab}`) }))}
       tab={params.tab}
       onTabChange={(tab) => setParams({ tab: tab as Tab, status: null, type: null })}
@@ -67,6 +91,7 @@ export function CustomerDetailView({ id }: { id: number }) {
       }
     >
       <div className="@container/table flex min-h-full flex-col">{body}</div>
+      {isStaff && <AddServiceDialog customerId={id} open={adding} onOpenChange={setAdding} />}
     </AppShell>
   );
 }

@@ -12,6 +12,7 @@ import type { Service } from "@/types/api";
 
 import type { ServiceFilters } from "../params";
 import { useServices } from "../queries";
+import { ServiceStatusToggle } from "./ServiceStatusToggle";
 import { ServiceTable } from "./ServiceTable";
 import { StatusHistorySheet } from "./StatusHistorySheet";
 
@@ -19,12 +20,14 @@ type Props = {
   customerId: number;
   filters: ServiceFilters;
   onFiltersChange: (patch: Partial<ServiceFilters>) => void;
+  isStaff: boolean;
   addAction: React.ReactNode;
 };
 
-export function ServicesTab({ customerId, filters, onFiltersChange, addAction }: Props) {
+export function ServicesTab({ customerId, filters, onFiltersChange, isStaff, addAction }: Props) {
   const t = useTranslations("services");
   const query = useServices(customerId, filters);
+  const [toggling, setToggling] = useState<Service | null>(null);
   const [historyOf, setHistoryOf] = useState<Service | null>(null);
   const filtered = filters.status !== null || filters.type !== null;
 
@@ -54,8 +57,8 @@ export function ServicesTab({ customerId, filters, onFiltersChange, addAction }:
       <div aria-busy={query.isPlaceholderData} className={query.isPlaceholderData ? "opacity-60" : undefined}>
         <ServiceTable
           services={query.data.results}
-          canChangeStatus={false}
-          onChangeStatus={() => undefined}
+          canChangeStatus={isStaff}
+          onChangeStatus={setToggling}
           onShowHistory={setHistoryOf}
         />
         <Pagination
@@ -70,6 +73,13 @@ export function ServicesTab({ customerId, filters, onFiltersChange, addAction }:
   return (
     <>
       {body}
+      {isStaff && (
+        <ServiceStatusToggle
+          key={toggling?.id}
+          service={toggling}
+          onOpenChange={(open) => !open && setToggling(null)}
+        />
+      )}
       <StatusHistorySheet service={historyOf} onOpenChange={(open) => !open && setHistoryOf(null)} />
     </>
   );
