@@ -6,6 +6,7 @@ from apps.core.views import healthz
 
 api_v1 = [
     path("auth/", include("apps.accounts.urls")),
+    path("", include("apps.customers.urls")),
 ]
 
 urlpatterns = [
