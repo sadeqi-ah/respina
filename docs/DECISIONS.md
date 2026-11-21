@@ -176,6 +176,32 @@ language-neutral (`message` is always English).
 Every UI change must be checked in both directions (`lint:rtl` guards physical-direction
 classes). New error codes need translations in both locales.
 
+### RTL changes to the Obsidian block (Task 2.2)
+The block was committed unmodified first, so these are its only edits and can be re-applied
+after upgrading it. Layout CSS already used logical properties (`start-0`, `border-e`, flexbox),
+so it mirrored by itself; only code that measures in physical coordinates needed changes. The
+direction comes from Radix `useDirection()` (one shared `@radix-ui/react-direction` context).
+
+| Area | LTR behaviour | RTL change |
+|---|---|---|
+| Sidebar resize (pointer) | width += `clientX - startX` | delta negated: dragging toward the content (left) widens |
+| Sidebar resize (keys) | ArrowRight grows | physical keys: the arrow pointing at the content grows (ArrowLeft) |
+| Mobile drawer | slides in from `x: -100%` | slides in from `x: 100%` (its own inline-start edge) |
+| Hover highlight | translated by `offsetLeft` | anchored at `start-0`, so offset = distance between right edges |
+| Active pill | Motion `layoutId` | none needed |
+
+`shadcn/sheet.tsx` keeps physical `side="left" / "right"` variants (marked `rtl-ok`); callers
+choose the side from the direction. Visual baselines: `frontend/e2e/__screenshots__/`.
+
+### Persian font
+`fa` uses Yekan Bakh (fontiran.com, commercial) as one variable font with `wght` 100–950 and
+`wdth` 62.5–150. Both axes are declared as `@font-face` ranges, so `font-weight` /
+`font-stretch` (and Tailwind's `font-*` / `font-stretch-*`) drive them directly. The licence
+forbids redistributing the file and requires a web licence for server use, so it is gitignored
+and installed per machine; Vazirmatn (OFL, via `next/font`) is the fallback wherever it's missing.
+The Latin-digit variant is used: Persian digits come from `Intl` formatting, and Latin digits
+stay correct inside emails, phone numbers and IDs.
+
 ---
 
 ## ADR-009: No global client store
