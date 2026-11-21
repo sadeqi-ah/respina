@@ -58,10 +58,7 @@ final class RepositoryTest extends TestCase
         if (!isset($this->owner)) {
             return;
         }
-        // Django cascades in Python, not in the DB (no ON DELETE on its FKs), so delete logs first.
-        $this->owner->prepare(
-            'DELETE FROM service_status_logs WHERE service_id IN (SELECT id FROM services WHERE customer_id IN (:a, :b))'
-        )->execute(['a' => $this->customerA, 'b' => $this->customerB]);
+        // Audit rows go with their services: ON DELETE CASCADE in the database (backend migration 0003).
         $this->owner->prepare('DELETE FROM services WHERE customer_id IN (:a, :b)')->execute(['a' => $this->customerA, 'b' => $this->customerB]);
         $this->owner->prepare('DELETE FROM customers WHERE id IN (:a, :b)')->execute(['a' => $this->customerA, 'b' => $this->customerB]);
         $this->owner->prepare('DELETE FROM accounts_user WHERE id = :id')->execute(['id' => $this->staffUserId]);
