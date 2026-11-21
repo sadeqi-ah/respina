@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createSharedRefresh } from "@/lib/bff/shared-refresh";
 import type { Tokens } from "@/lib/bff/tokens";
 
 /** Internal Django URL (never exposed to the browser; no NEXT_PUBLIC_ prefix). */
@@ -50,5 +51,11 @@ export async function refreshTokens(refresh: string, requestId: string): Promise
   if (!response.ok) return null;
   return asTokens(await response.json().catch(() => null));
 }
+
+/**
+ * The refresh every route uses: concurrent requests presenting the same (soon blacklisted)
+ * refresh token share one call to Django and get the same rotated pair (ADR-012).
+ */
+export const sharedRefreshTokens = createSharedRefresh(refreshTokens);
 
 export { asTokens };

@@ -4,7 +4,7 @@ import { toDjangoPath } from "@/lib/bff/path";
 import { sendWithRefresh } from "@/lib/bff/refresh";
 import { requestIdFrom } from "@/lib/bff/request-id";
 import { ACCESS_COOKIE, clearAuthCookies, REFRESH_COOKIE, setAuthCookies } from "@/lib/server/cookies";
-import { djangoFetch, DjangoUnavailable, refreshTokens } from "@/lib/server/django";
+import { djangoFetch, DjangoUnavailable, sharedRefreshTokens } from "@/lib/server/django";
 import { envelope } from "@/lib/server/errors";
 
 /**
@@ -46,7 +46,7 @@ async function proxy(
       access: request.cookies.get(ACCESS_COOKIE)?.value,
       refresh: request.cookies.get(REFRESH_COOKIE)?.value,
       send,
-      refreshTokens: (refresh) => refreshTokens(refresh, requestId),
+      refreshTokens: (refresh) => sharedRefreshTokens(refresh, requestId),
     });
   } catch (error) {
     if (error instanceof DjangoUnavailable) {
