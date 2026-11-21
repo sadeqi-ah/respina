@@ -176,6 +176,32 @@ language-neutral (`message` is always English).
 Every UI change must be checked in both directions (`lint:rtl` guards physical-direction
 classes). New error codes need translations in both locales.
 
+### RTL changes to the Obsidian block (Task 2.2)
+The block was committed unmodified first, so these are its only edits and can be re-applied
+after upgrading it. Layout CSS already used logical properties (`start-0`, `border-e`, flexbox),
+so it mirrored by itself; only code that measures in physical coordinates needed changes. The
+direction comes from Radix `useDirection()` (one shared `@radix-ui/react-direction` context).
+
+| Area | LTR behaviour | RTL change |
+|---|---|---|
+| Sidebar resize (pointer) | width += `clientX - startX` | delta negated: dragging toward the content (left) widens |
+| Sidebar resize (keys) | ArrowRight grows | physical keys: the arrow pointing at the content grows (ArrowLeft) |
+| Mobile drawer | slides in from `x: -100%` | slides in from `x: 100%` (its own inline-start edge) |
+| Hover highlight | translated by `offsetLeft` | anchored at `start-0`, so offset = distance between right edges |
+| Active pill | Motion `layoutId` | none needed |
+
+`shadcn/sheet.tsx` keeps physical `side="left" / "right"` variants (marked `rtl-ok`); callers
+choose the side from the direction. Visual baselines: `frontend/e2e/__screenshots__/`.
+
+### Persian font
+`fa` uses Yekan Bakh (fontiran.com, commercial) as one variable font with `wght` 100–950 and
+`wdth` 62.5–150. Both axes are declared as `@font-face` ranges, so `font-weight` /
+`font-stretch` (and Tailwind's `font-*` / `font-stretch-*`) drive them directly. The licence
+forbids redistributing the file and requires a web licence for server use, so it is gitignored
+and installed per machine; Vazirmatn (OFL, via `next/font`) is the fallback wherever it's missing.
+The Latin-digit variant is used: Persian digits come from `Intl` formatting, and Latin digits
+stay correct inside emails, phone numbers and IDs.
+
 ---
 
 ## ADR-009: No global client store
@@ -213,3 +239,55 @@ with `--no-ff`. Conventional Commits, no tool attribution lines.
 ### Consequences
 `main` is always releasable; parallel phases integrate continuously on `dev`. Branches must be
 brought up to date with `dev` before merging.
+
+---
+
+## ADR-011: Next.js Cache Components off
+
+- **Status:** Accepted
+- **Date:** 2026-11-21
+
+### Context
+Next.js 16 scaffolds new apps with `cacheComponents: true`. With it, reading `cookies()` outside
+a `<Suspense>` boundary is a build error, because request data can't be part of the prerendered
+static shell. Our root layout reads the `NEXT_LOCALE` cookie to set `<html lang dir>`, and every
+page is per-user data fetched through the BFF.
+
+### Decision
+Set `cacheComponents: false`. Pages render per request; client data goes through TanStack Query.
+
+### Consequences
+No Suspense plumbing around the locale and session reads, and no static shell to keep correct.
+We give up prerendering, which this authenticated dashboard can't use anyway. Revisit if public,
+cacheable pages are added.
+
+---
+
+## ADR-012: Single-use refresh tokens, with refresh shared in the BFF
+
+- **Status:** Accepted
+- **Date:** 2026-11-21
+
+### Context
+Refresh tokens were rotated, but without simplejwt's blacklist the old token stayed valid for its
+whole 7-day lifetime. A real-token test showed a rotated refresh token still being accepted, so
+rotation protected nothing: a stolen refresh token kept working after the user moved on.
+Turning the blacklist on alone breaks a normal case, though: when two requests from one browser
+hit an expired access token together, each refreshes with the same refresh token, the second is
+rejected as blacklisted, and the user is signed out.
+
+### Decision
+- **Django:** `token_blacklist` app + `BLACKLIST_AFTER_ROTATION`. A refresh token works once.
+- **BFF:** `createSharedRefresh` (`frontend/src/lib/bff/shared-refresh.ts`). Requests that present
+  the same refresh token share one in-flight refresh and receive the same rotated pair. The result
+  is kept for a 10 s grace period so a request that started a moment later, still carrying the old
+  cookie, isn't signed out. Errors (Django unreachable) aren't kept; at most 1,000 tokens tracked.
+
+### Consequences
+- A replayed refresh token is rejected once the grace period has passed (401, cookies cleared).
+- Within the 10 s grace period, whoever presents the old refresh token gets the same new pair. The
+  window is deliberately short; it's the price of not signing users out on concurrent requests.
+- The sharing is per process. It's correct for our single Next.js server; running several replicas
+  would need sticky sessions or a shared store (e.g. Redis, which we don't add today).
+- `token_blacklist_outstandingtoken` grows with every issued token; `manage.py flushexpiredtokens`
+  prunes it (to be scheduled with the stack in Phase 5).

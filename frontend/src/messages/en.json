@@ -1,0 +1,213 @@
+{
+  "common": {
+    "appName": "Cloud Panel",
+    "appDescription": "Cloud customer and service management",
+    "language": "Language",
+    "languages": {
+      "en": "English",
+      "fa": "فارسی"
+    },
+    "loading": "Loading…",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "signOut": "Sign out",
+    "account": "Account",
+    "signedInAs": "Signed in as",
+    "roles": {
+      "staff": "Staff",
+      "customer": "Customer"
+    },
+    "comingSoon": "This page is being built.",
+    "requestId": "Request ID",
+    "pagination": "Pagination",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "pageOf": "Page {page} of {total}",
+    "results": "{count} results",
+    "navigation": "Main navigation",
+    "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
+    "resizeSidebar": "Resize sidebar",
+    "notifications": "Notifications"
+  },
+  "nav": {
+    "customers": "Customers",
+    "myAccount": "My account"
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Use your Cloud Panel account.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "signedOut": "You have been signed out."
+  },
+  "customers": {
+    "title": "Customers",
+    "new": "New customer",
+    "tableCaption": "Customers",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "services": "Services",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "actionsFor": "Actions for {name}",
+    "view": "View",
+    "copyEmail": "Copy email",
+    "emailCopied": "Email copied",
+    "copyFailed": "Couldn't copy the email",
+    "searchLabel": "Search customers",
+    "searchPlaceholder": "Search name, email or phone",
+    "clearSearch": "Clear search",
+    "empty": {
+      "title": "No customers yet",
+      "detail": "Customers you add will show up here."
+    },
+    "noResults": {
+      "title": "No customers match",
+      "detail": "Nothing matches “{search}”. Try another name, email or phone."
+    },
+    "form": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "phoneHint": "Mobile or landline, e.g. 09121234567 or +989121234567.",
+      "submit": "Create customer",
+      "submitting": "Creating…",
+      "cancel": "Cancel",
+      "created": "{name} was added",
+      "staffOnly": "Only staff can add customers.",
+      "back": "Back to customers"
+    },
+    "tabs": {
+      "services": "Services",
+      "details": "Details"
+    },
+    "details": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "services": "Services",
+      "created": "Created"
+    },
+    "notFound": {
+      "title": "Customer not found",
+      "detail": "It doesn't exist, or you don't have access to it."
+    }
+  },
+  "services": {
+    "tableCaption": "Services",
+    "count": "{count, plural, =0 {No services} one {# service} other {# services}}",
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "actionsFor": "Actions for {name}",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "viewHistory": "View history",
+    "cancel": "Cancel",
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "types": {
+      "cloud_server": "Cloud server",
+      "vps": "VPS",
+      "dedicated_server": "Dedicated server",
+      "object_storage": "Object storage",
+      "managed_database": "Managed database"
+    },
+    "filters": {
+      "status": "Status",
+      "type": "Type",
+      "all": "All"
+    },
+    "clearFilters": "Clear filters",
+    "empty": {
+      "title": "No services yet",
+      "detail": "Services added for this customer will show up here."
+    },
+    "noResults": {
+      "title": "No services match",
+      "detail": "Nothing matches these filters."
+    },
+    "add": {
+      "title": "Add service",
+      "detail": "New services start active.",
+      "name": "Name",
+      "type": "Type",
+      "typePlaceholder": "Choose a type",
+      "submit": "Add service",
+      "submitting": "Adding…",
+      "created": "{name} was added"
+    },
+    "statusChange": {
+      "suspendTitle": "Suspend {name}?",
+      "activateTitle": "Activate {name}?",
+      "suspendDetail": "The service stops until it is activated again. This is recorded in its history.",
+      "activateDetail": "The service starts running again. This is recorded in its history.",
+      "reason": "Reason (optional)",
+      "reasonHint": "Shown in the status history. Up to {max} characters.",
+      "suspended": "{name} was suspended",
+      "activated": "{name} was activated",
+      "failed": "Couldn't change the status of {name}"
+    },
+    "history": {
+      "title": "Status history",
+      "loading": "Loading history",
+      "empty": "The status of this service has never changed.",
+      "to": "to",
+      "byVia": "{who} via {source}",
+      "who": {
+        "you": "You",
+        "system": "System",
+        "user": "User #{id}"
+      },
+      "source": {
+        "api": "panel",
+        "php_module": "PHP module",
+        "admin": "admin site"
+      }
+    }
+  },
+  "errors": {
+    "validation_error": "Please check the highlighted fields.",
+    "not_authenticated": "Please sign in to continue.",
+    "token_invalid": "Your session has expired. Please sign in again.",
+    "invalid_credentials": "Email or password is incorrect.",
+    "permission_denied": "You don't have permission to do that.",
+    "not_found": "We couldn't find that.",
+    "method_not_allowed": "That action isn't available.",
+    "conflict": "This conflicts with existing data.",
+    "invalid_status_transition": "The service is already in that status.",
+    "throttled": "Too many attempts. Please wait a minute and try again.",
+    "dependency_unavailable": "The service is temporarily unavailable. Please try again shortly.",
+    "internal_error": "Something went wrong on our side.",
+    "csrf_failed": "Your request couldn't be verified. Reload the page and try again.",
+    "network_error": "Can't reach the server. Check your connection.",
+    "unknown_error": "Something went wrong."
+  },
+  "validation": {
+    "required": "This field is required.",
+    "blank": "This field can't be empty.",
+    "null": "This field is required.",
+    "invalid": "Enter a valid value.",
+    "invalid_email": "Enter a valid email address.",
+    "unique": "This value is already in use.",
+    "max_length": "This value is too long.",
+    "invalid_phone": "Enter a valid phone number, e.g. 09121234567.",
+    "invalid_choice": "Choose one of the available options."
+  }
+}
