@@ -3,22 +3,66 @@
     "appName": "Cloud Panel",
     "appDescription": "Cloud customer and service management",
     "language": "Language",
-    "languages": { "en": "English", "fa": "فارسی" },
+    "languages": {
+      "en": "English",
+      "fa": "فارسی"
+    },
     "loading": "Loading…",
     "retry": "Try again",
     "cancel": "Cancel",
     "save": "Save",
     "close": "Close",
     "openMenu": "Open menu",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "account": "Account",
+    "signedInAs": "Signed in as",
+    "roles": {
+      "staff": "Staff",
+      "customer": "Customer"
+    },
+    "comingSoon": "This page is being built."
   },
   "nav": {
     "customers": "Customers",
     "myAccount": "My account"
   },
-  "auth": {},
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Use your Cloud Panel account.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "signedOut": "You have been signed out."
+  },
   "customers": {},
   "services": {},
-  "errors": {},
-  "validation": {}
+  "errors": {
+    "validation_error": "Please check the highlighted fields.",
+    "not_authenticated": "Please sign in to continue.",
+    "token_invalid": "Your session has expired. Please sign in again.",
+    "invalid_credentials": "Email or password is incorrect.",
+    "permission_denied": "You don't have permission to do that.",
+    "not_found": "We couldn't find that.",
+    "method_not_allowed": "That action isn't available.",
+    "conflict": "This conflicts with existing data.",
+    "invalid_status_transition": "The service is already in that status.",
+    "throttled": "Too many attempts. Please wait a minute and try again.",
+    "dependency_unavailable": "The service is temporarily unavailable. Please try again shortly.",
+    "internal_error": "Something went wrong on our side.",
+    "csrf_failed": "Your request couldn't be verified. Reload the page and try again.",
+    "network_error": "Can't reach the server. Check your connection.",
+    "unknown_error": "Something went wrong."
+  },
+  "validation": {
+    "required": "This field is required.",
+    "blank": "This field can't be empty.",
+    "null": "This field is required.",
+    "invalid": "Enter a valid value.",
+    "invalid_email": "Enter a valid email address.",
+    "unique": "This value is already in use.",
+    "max_length": "This value is too long.",
+    "invalid_phone": "Enter a valid phone number, e.g. 09121234567.",
+    "invalid_choice": "Choose one of the available options."
+  }
 }

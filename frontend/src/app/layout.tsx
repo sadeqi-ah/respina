@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { QueryProvider } from "@/components/QueryProvider";
 import { DirectionProvider } from "@/components/ui/direction";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,10 +32,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
           <DirectionProvider dir={dir}>
-            <TooltipProvider>
-              {children}
-              <Toaster position={dir === "rtl" ? "bottom-left" : "bottom-right"} />
-            </TooltipProvider>
+            <QueryProvider>
+              <TooltipProvider>
+                {children}
+                <Toaster position={dir === "rtl" ? "bottom-left" : "bottom-right"} />
+              </TooltipProvider>
+            </QueryProvider>
           </DirectionProvider>
         </NextIntlClientProvider>
       </body>
