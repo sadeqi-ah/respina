@@ -96,3 +96,22 @@ def test_token_endpoint_is_throttled(api_client, customer_user):
     statuses = [login(api_client, customer_user.email, "wrong").status_code for _ in range(11)]
     assert statuses[:10] == [401] * 10
     assert statuses[10] == 429
+
+
+def test_rotated_refresh_token_is_rejected(api_client, customer_user):
+    """A refresh token works once: after rotation it is blacklisted (a stolen copy goes stale)."""
+    tokens = login(api_client, customer_user.email).json()
+    first = api_client.post(REFRESH_URL, {"refresh": tokens["refresh"]}, format="json")
+    assert first.status_code == 200
+
+    replay = api_client.post(REFRESH_URL, {"refresh": tokens["refresh"]}, format="json")
+
+    assert replay.status_code == 401
+    assert replay.json()["error"]["code"] == "token_invalid"
+
+
+def test_new_refresh_token_from_rotation_works(api_client, customer_user):
+    tokens = login(api_client, customer_user.email).json()
+    rotated = api_client.post(REFRESH_URL, {"refresh": tokens["refresh"]}, format="json").json()
+    again = api_client.post(REFRESH_URL, {"refresh": rotated["refresh"]}, format="json")
+    assert again.status_code == 200
