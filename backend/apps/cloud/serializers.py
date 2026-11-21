@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from .models import Service
+from .models import Service, ServiceStatus, ServiceStatusLog
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -35,3 +35,25 @@ class ServiceSerializer(serializers.ModelSerializer):
     def create(self, validated_data) -> Service:
         with transaction.atomic():
             return Service.objects.create(customer=self.context["customer"], **validated_data)
+
+
+class StatusChangeSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=ServiceStatus.choices)
+    reason = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
+
+
+class ServiceStatusLogSerializer(serializers.ModelSerializer):
+    changed_by_id = serializers.IntegerField(read_only=True, allow_null=True)
+
+    class Meta:
+        model = ServiceStatusLog
+        fields = [
+            "id",
+            "from_status",
+            "to_status",
+            "changed_by_id",
+            "source",
+            "reason",
+            "created_at",
+        ]
+        read_only_fields = fields

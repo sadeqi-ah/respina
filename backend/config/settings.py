@@ -157,6 +157,10 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "ServiceStatusEnum": "apps.cloud.models.ServiceStatus",
+        "ServiceTypeEnum": "apps.cloud.models.ServiceType",
+    },
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
         "apps.core.schema.add_error_envelope",
