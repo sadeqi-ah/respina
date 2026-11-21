@@ -4,6 +4,7 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { Direction } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Check, ChevronDown, Menu, X } from "lucide-react";
 import { animate, AnimatePresence, motion, useMotionValue, useReducedMotion } from "motion/react";
@@ -499,6 +500,8 @@ export function DashboardShell({
   ...props
 }: DashboardShellProps) {
   const reduceMotion = useReducedMotion();
+  // RTL: sidebar on the right, drawer slides in from the right, resize handle math mirrored.
+  const isRtl = Direction.useDirection() === "rtl";
   const uid = useId();
   const titleId = `${uid}-title`;
   const sidebarId = `${uid}-sidebar`;
@@ -594,7 +597,9 @@ export function DashboardShell({
 
   const handleResizeMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!drag.current) return;
-    drag.current.width = clampWidth(drag.current.startWidth + event.clientX - drag.current.startX);
+    // The content lies to the right in LTR and to the left in RTL; dragging toward it widens.
+    const dx = event.clientX - drag.current.startX;
+    drag.current.width = clampWidth(drag.current.startWidth + (isRtl ? -dx : dx));
     setDragWidth(drag.current.width);
   };
 
@@ -608,9 +613,12 @@ export function DashboardShell({
   };
 
   const handleResizeKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    // Physical keys: the arrow pointing toward the content grows the sidebar (left in RTL).
+    const toward = isRtl ? "ArrowLeft" : "ArrowRight";
+    const away = isRtl ? "ArrowRight" : "ArrowLeft";
     const targets: Record<string, number> = {
-      ArrowLeft: width - RESIZE_STEP,
-      ArrowRight: width + RESIZE_STEP,
+      [away]: width - RESIZE_STEP,
+      [toward]: width + RESIZE_STEP,
       Home: minSidebarWidth,
       End: maxSidebarWidth,
     };
@@ -763,9 +771,9 @@ export function DashboardShell({
                     }
                   }}
                   className="absolute inset-y-0 start-0 flex w-[254px] max-w-[85%] flex-col border-e border-(--obsidian-dashboard-shell-border) bg-(--obsidian-dashboard-shell-sidebar) shadow-[0_16px_40px_rgb(0_0_0/0.35)]"
-                  initial={{ x: reduceMotion ? 0 : "-100%" }}
+                  initial={{ x: reduceMotion ? 0 : isRtl ? "100%" : "-100%" }}
                   animate={{ x: 0 }}
-                  exit={{ x: reduceMotion ? 0 : "-100%" }}
+                  exit={{ x: reduceMotion ? 0 : isRtl ? "100%" : "-100%" }}
                   transition={{ duration: reduceMotion ? 0 : 0.28, ease: EASE_OUT }}
                 >
                   <SidebarContent {...sidebarProps} onSelect={selectItemFromDrawer} onClose={closeDrawer} closeButtonRef={closeButtonRef} />
@@ -798,6 +806,7 @@ function HoverHighlightList({
   children: ReactNode;
 }) {
   const reduceMotion = !!useReducedMotion();
+  const isRtl = Direction.useDirection() === "rtl";
   const listRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -821,14 +830,16 @@ function HoverHighlightList({
       // Leaving and re-entering quickly still glides, so a pointer that grazes a border doesn't make it blink.
       const glide = !reduceMotion && (isShown.current || performance.now() - hiddenAt.current < 150);
       const moveTo = (value: typeof x, target: number) => (glide ? animate(value, target, FOLLOW_SPRING) : value.jump(target));
-      moveTo(x, left);
+      // offsetLeft is always measured from the left. The highlight is anchored at start-0, which is
+      // the right edge in RTL, so there it moves by the (negative) distance between right edges.
+      moveTo(x, isRtl ? left + element.offsetWidth - list.offsetWidth : left);
       moveTo(y, top);
       moveTo(width, element.offsetWidth);
       moveTo(height, element.offsetHeight);
       isShown.current = true;
       setIsVisible(true);
     },
-    [height, reduceMotion, width, x, y],
+    [height, isRtl, reduceMotion, width, x, y],
   );
 
   const hide = useCallback(() => {
