@@ -1,15 +1,13 @@
-"use client";
+import { Suspense } from "react";
 
-import { useTranslations } from "next-intl";
+import { LoadingState } from "@/components/states/LoadingState";
+import { CustomersView } from "@/features/customers/components/CustomersView";
 
-import { AppShell } from "@/features/shell/AppShell";
-
-// Placeholder: the customer list arrives in Task 2.4.
+// useSearchParams() (URL list state) needs a Suspense boundary.
 export default function CustomersPage() {
-  const t = useTranslations();
   return (
-    <AppShell title={t("nav.customers")}>
-      <p className="p-6 text-muted-foreground">{t("common.comingSoon")}</p>
-    </AppShell>
+    <Suspense fallback={<LoadingState />}>
+      <CustomersView />
+    </Suspense>
   );
 }

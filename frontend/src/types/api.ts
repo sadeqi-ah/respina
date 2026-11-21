@@ -13,3 +13,14 @@ export type ErrorEnvelope = {
     request_id: string | null;
   };
 };
+
+export type Customer = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  services_count: number;
+  created_at: string;
+};

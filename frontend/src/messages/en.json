@@ -20,7 +20,13 @@
       "staff": "Staff",
       "customer": "Customer"
     },
-    "comingSoon": "This page is being built."
+    "comingSoon": "This page is being built.",
+    "requestId": "Request ID",
+    "pagination": "Pagination",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "pageOf": "Page {page} of {total}",
+    "results": "{count} results"
   },
   "nav": {
     "customers": "Customers",
@@ -35,7 +41,35 @@
     "submitting": "Signing in…",
     "signedOut": "You have been signed out."
   },
-  "customers": {},
+  "customers": {
+    "title": "Customers",
+    "new": "New customer",
+    "tableCaption": "Customers",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "services": "Services",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "actionsFor": "Actions for {name}",
+    "view": "View",
+    "copyEmail": "Copy email",
+    "emailCopied": "Email copied",
+    "copyFailed": "Couldn't copy the email",
+    "searchLabel": "Search customers",
+    "searchPlaceholder": "Search name, email or phone",
+    "clearSearch": "Clear search",
+    "empty": {
+      "title": "No customers yet",
+      "detail": "Customers you add will show up here."
+    },
+    "noResults": {
+      "title": "No customers match",
+      "detail": "Nothing matches “{search}”. Try another name, email or phone."
+    }
+  },
   "services": {},
   "errors": {
     "validation_error": "Please check the highlighted fields.",

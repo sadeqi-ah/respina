@@ -20,7 +20,13 @@
       "staff": "کارمند",
       "customer": "مشتری"
     },
-    "comingSoon": "این صفحه در حال ساخت است."
+    "comingSoon": "این صفحه در حال ساخت است.",
+    "requestId": "شناسهٔ درخواست",
+    "pagination": "صفحه‌بندی",
+    "previousPage": "صفحهٔ قبل",
+    "nextPage": "صفحهٔ بعد",
+    "pageOf": "صفحهٔ {page} از {total}",
+    "results": "{count} نتیجه"
   },
   "nav": {
     "customers": "مشتریان",
@@ -35,7 +41,35 @@
     "submitting": "در حال ورود…",
     "signedOut": "از حساب خود خارج شدید."
   },
-  "customers": {},
+  "customers": {
+    "title": "مشتریان",
+    "new": "مشتری جدید",
+    "tableCaption": "مشتریان",
+    "columns": {
+      "name": "نام",
+      "email": "ایمیل",
+      "phone": "تلفن",
+      "services": "سرویس‌ها",
+      "created": "تاریخ ایجاد",
+      "actions": "عملیات"
+    },
+    "actionsFor": "عملیات برای {name}",
+    "view": "مشاهده",
+    "copyEmail": "کپی ایمیل",
+    "emailCopied": "ایمیل کپی شد",
+    "copyFailed": "کپی ایمیل انجام نشد",
+    "searchLabel": "جست‌وجوی مشتریان",
+    "searchPlaceholder": "جست‌وجوی نام، ایمیل یا تلفن",
+    "clearSearch": "پاک کردن جست‌وجو",
+    "empty": {
+      "title": "هنوز مشتری‌ای ثبت نشده",
+      "detail": "مشتریانی که اضافه کنید اینجا نمایش داده می‌شوند."
+    },
+    "noResults": {
+      "title": "مشتری‌ای پیدا نشد",
+      "detail": "نتیجه‌ای برای «{search}» نیست. نام، ایمیل یا تلفن دیگری را امتحان کنید."
+    }
+  },
   "services": {},
   "errors": {
     "validation_error": "لطفاً فیلدهای مشخص‌شده را بررسی کنید.",
