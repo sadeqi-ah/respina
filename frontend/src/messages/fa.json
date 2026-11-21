@@ -1,0 +1,24 @@
+{
+  "common": {
+    "appName": "پنل ابری",
+    "appDescription": "مدیریت مشتریان و سرویس‌های ابری",
+    "language": "زبان",
+    "languages": { "en": "English", "fa": "فارسی" },
+    "loading": "در حال بارگذاری…",
+    "retry": "تلاش دوباره",
+    "cancel": "انصراف",
+    "save": "ذخیره",
+    "close": "بستن",
+    "openMenu": "باز کردن منو",
+    "signOut": "خروج"
+  },
+  "nav": {
+    "customers": "مشتریان",
+    "myAccount": "حساب من"
+  },
+  "auth": {},
+  "customers": {},
+  "services": {},
+  "errors": {},
+  "validation": {}
+}

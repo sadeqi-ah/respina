@@ -1,0 +1,24 @@
+{
+  "common": {
+    "appName": "Cloud Panel",
+    "appDescription": "Cloud customer and service management",
+    "language": "Language",
+    "languages": { "en": "English", "fa": "فارسی" },
+    "loading": "Loading…",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "openMenu": "Open menu",
+    "signOut": "Sign out"
+  },
+  "nav": {
+    "customers": "Customers",
+    "myAccount": "My account"
+  },
+  "auth": {},
+  "customers": {},
+  "services": {},
+  "errors": {},
+  "validation": {}
+}
