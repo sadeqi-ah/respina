@@ -12,6 +12,15 @@ def _fast_password_hasher(settings):
 
 
 @pytest.fixture(autouse=True)
+def _plain_static_storage(settings):
+    # The manifest storage needs `collectstatic`, which only runs in the image build.
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+
+
+@pytest.fixture(autouse=True)
 def _clear_cache():
     # Throttle counters live in the cache; keep tests independent.
     cache.clear()
