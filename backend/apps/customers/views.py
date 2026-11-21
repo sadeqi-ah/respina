@@ -7,11 +7,12 @@ from rest_framework.response import Response
 
 from apps.cloud.models import ServiceStatus, ServiceType
 from apps.cloud.selectors import visible_services_for
+from apps.cloud.serializers import ServiceSerializer
 from apps.core.permissions import IsStaffOrReadOnly
 
 from .filters import ServiceFilter
 from .selectors import visible_customers_for
-from .serializers import CustomerSerializer, ServiceSerializer
+from .serializers import CustomerSerializer
 
 
 def _with_codes(form_errors) -> dict[str, list[ErrorDetail]]:
