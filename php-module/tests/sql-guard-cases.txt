@@ -1,0 +1,15 @@
+# Lines the SQL guard must FLAG (one PHP snippet per line, after "BAD: ")
+BAD: $db->query("SELECT * FROM services WHERE id = $id");
+BAD: $db->query('SELECT * FROM services WHERE id = ' . $id);
+BAD: $this->db->exec($sql);
+BAD: $pdo->query(sprintf('SELECT %s', $col));
+BAD: $db->query( "DELETE FROM x WHERE id = {$id}" );
+BAD: $db->exec('UPDATE services SET status = \'' . $s . '\'');
+BAD: $db->query('SELECT 1' . $suffix);
+# Lines it must ALLOW
+OK: $db()->query('SELECT 1');
+OK: $this->db->query("SELECT 1");
+OK: $stmt = $this->db->prepare('SELECT * FROM services WHERE id = :id');
+OK: $stmt->execute(['id' => $id]);
+OK: $pdo->exec('SET TIME ZONE UTC');
+OK: $result = $cache->querySelector($x);
