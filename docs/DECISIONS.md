@@ -260,3 +260,34 @@ Set `cacheComponents: false`. Pages render per request; client data goes through
 No Suspense plumbing around the locale and session reads, and no static shell to keep correct.
 We give up prerendering, which this authenticated dashboard can't use anyway. Revisit if public,
 cacheable pages are added.
+
+---
+
+## ADR-012: Single-use refresh tokens, with refresh shared in the BFF
+
+- **Status:** Accepted
+- **Date:** 2026-11-21
+
+### Context
+Refresh tokens were rotated, but without simplejwt's blacklist the old token stayed valid for its
+whole 7-day lifetime. A real-token test showed a rotated refresh token still being accepted, so
+rotation protected nothing: a stolen refresh token kept working after the user moved on.
+Turning the blacklist on alone breaks a normal case, though: when two requests from one browser
+hit an expired access token together, each refreshes with the same refresh token, the second is
+rejected as blacklisted, and the user is signed out.
+
+### Decision
+- **Django:** `token_blacklist` app + `BLACKLIST_AFTER_ROTATION`. A refresh token works once.
+- **BFF:** `createSharedRefresh` (`frontend/src/lib/bff/shared-refresh.ts`). Requests that present
+  the same refresh token share one in-flight refresh and receive the same rotated pair. The result
+  is kept for a 10 s grace period so a request that started a moment later, still carrying the old
+  cookie, isn't signed out. Errors (Django unreachable) aren't kept; at most 1,000 tokens tracked.
+
+### Consequences
+- A replayed refresh token is rejected once the grace period has passed (401, cookies cleared).
+- Within the 10 s grace period, whoever presents the old refresh token gets the same new pair. The
+  window is deliberately short; it's the price of not signing users out on concurrent requests.
+- The sharing is per process. It's correct for our single Next.js server; running several replicas
+  would need sticky sessions or a shared store (e.g. Redis, which we don't add today).
+- `token_blacklist_outstandingtoken` grows with every issued token; `manage.py flushexpiredtokens`
+  prunes it (to be scheduled with the stack in Phase 5).
