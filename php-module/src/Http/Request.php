@@ -30,13 +30,20 @@ final class Request
     public static function fromGlobals(): self
     {
         $headers = [];
+        // getallheaders() works under Apache (where mod_php drops Authorization from $_SERVER)
+        // and under the built-in server; $_SERVER covers other SAPIs.
+        if (function_exists('getallheaders')) {
+            foreach (getallheaders() as $name => $value) {
+                $headers[strtolower((string) $name)] = (string) $value;
+            }
+        }
         foreach ($_SERVER as $key => $value) {
             if (is_string($value) && str_starts_with((string) $key, 'HTTP_')) {
-                $headers[strtolower(str_replace('_', '-', substr((string) $key, 5)))] = $value;
+                $headers[strtolower(str_replace('_', '-', substr((string) $key, 5)))] ??= $value;
             }
         }
         if (isset($_SERVER['CONTENT_TYPE'])) {
-            $headers['content-type'] = (string) $_SERVER['CONTENT_TYPE'];
+            $headers['content-type'] ??= (string) $_SERVER['CONTENT_TYPE'];
         }
         $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
 
@@ -61,9 +68,12 @@ final class Request
         return $this->headers[strtolower($name)] ?? '';
     }
 
+    /**
+     * JSON endpoints: the API and the container healthcheck. Everything else is HTML.
+     */
     public function isApi(): bool
     {
-        return $this->path === '/api' || str_starts_with($this->path, '/api/');
+        return $this->path === '/api' || str_starts_with($this->path, '/api/') || $this->path === '/healthz';
     }
 
     /**

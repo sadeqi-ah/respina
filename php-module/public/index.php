@@ -43,6 +43,12 @@ try {
     $authController = new AuthController(new DjangoAuthClient($config->djangoApiUrl), $verifier);
 
     $router = new Router();
+    // Liveness + DB check for the container healthcheck (connects as php_module).
+    $router->add('GET', '/healthz', static function () use ($db): Response {
+        $db()->query('SELECT 1');
+
+        return Response::json(200, ['status' => 'ok']);
+    });
     // JSON API: stateless, Bearer JWT. No session, so no CSRF surface.
     $router->add('GET', '/api/customers/{id}', $api->customer(...));
     $router->add('GET', '/api/customers/{id}/services', $api->services(...));
