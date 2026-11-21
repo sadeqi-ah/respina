@@ -17,14 +17,16 @@ import type { Customer } from "@/types/api";
 
 import { sortStateOf, type Ordering, type SortKey } from "../params";
 
-// Adapted from Obsidian's dashboard-shell-page table. Columns hide as the table's own container
+// Adapted from Obsidian's dashboard-shell-page table (registry: @obsidian/dashboard-shell-page). Columns hide as the table's own container
 // narrows, in this order: created → services → phone → email. The name is always shown.
 const cell = "px-3 py-2.5 text-start align-middle @lg/table:px-4";
+// Thresholds are measured, not guessed: each is the first container size where the columns
+// shown so far fit without overflow (e2e/table-fit.spec.ts sweeps every width to keep it so).
 const hideBelow = {
-  sm: "hidden @sm/table:table-cell",
-  md: "hidden @md/table:table-cell",
-  lg: "hidden @lg/table:table-cell",
-  xl: "hidden @xl/table:table-cell",
+  email: "hidden @md/table:table-cell", // name + email + actions need ~410px
+  phone: "hidden @xl/table:table-cell", // + phone ~540px
+  services: "hidden @2xl/table:table-cell", // + services ~645px
+  created: "hidden @3xl/table:table-cell", // + created ~755px
 } as const;
 
 type Props = { customers: Customer[]; ordering: Ordering; onSort: (key: SortKey) => void };
@@ -49,13 +51,13 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
       <thead>
         <tr className="border-y border-(--obsidian-dashboard-shell-border) text-xs text-(--obsidian-dashboard-shell-text-subtle)">
           <SortHeader label={t("columns.name")} sortKey="name" sort={sort} onSort={onSort} />
-          <th scope="col" className={cn(cell, hideBelow.sm, "font-normal")}>
+          <th scope="col" className={cn(cell, hideBelow.email, "font-normal")}>
             {t("columns.email")}
           </th>
-          <th scope="col" className={cn(cell, hideBelow.md, "font-normal")}>
+          <th scope="col" className={cn(cell, hideBelow.phone, "font-normal")}>
             {t("columns.phone")}
           </th>
-          <th scope="col" className={cn(cell, hideBelow.lg, "text-end font-normal")}>
+          <th scope="col" className={cn(cell, hideBelow.services, "text-end font-normal")}>
             {t("columns.services")}
           </th>
           <SortHeader
@@ -63,7 +65,7 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
             sortKey="created"
             sort={sort}
             onSort={onSort}
-            className={hideBelow.xl}
+            className={hideBelow.created}
           />
           <th scope="col" className="w-10 py-2.5 ps-0 pe-3 @lg/table:pe-4">
             <span className="sr-only">{t("columns.actions")}</span>
@@ -88,7 +90,7 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
                 {/* The email moves under the name once its own column is hidden. */}
                 <bdi
                   dir="ltr"
-                  className="max-w-full self-start truncate text-xs text-(--obsidian-dashboard-shell-text-subtle) @sm/table:hidden"
+                  className="max-w-full self-start truncate text-xs text-(--obsidian-dashboard-shell-text-subtle) @md/table:hidden"
                 >
                   {customer.email}
                 </bdi>
@@ -97,7 +99,7 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
             <td
               className={cn(
                 cell,
-                hideBelow.sm,
+                hideBelow.email,
                 "max-w-64 truncate text-(--obsidian-dashboard-shell-text-muted)",
               )}
             >
@@ -106,7 +108,7 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
             <td
               className={cn(
                 cell,
-                hideBelow.md,
+                hideBelow.phone,
                 "whitespace-nowrap text-(--obsidian-dashboard-shell-text-muted)",
               )}
             >
@@ -114,13 +116,13 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
                 {customer.phone}
               </bdi>
             </td>
-            <td className={cn(cell, hideBelow.lg, "text-end tabular-nums")}>
+            <td className={cn(cell, hideBelow.services, "text-end tabular-nums")}>
               {format.number(customer.services_count)}
             </td>
             <td
               className={cn(
                 cell,
-                hideBelow.xl,
+                hideBelow.created,
                 "text-xs whitespace-nowrap text-(--obsidian-dashboard-shell-text-muted)",
               )}
             >

@@ -1,6 +1,6 @@
 "use client";
 
-import { User as UserIcon, UserCard } from "@duo-icons/react";
+import { IdCard, User as UserIcon } from "@duo-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -49,7 +49,7 @@ export function AppShell({ headerActions, ...props }: ShellProps & { headerActio
                 href: `/customers/${me.customer_id}`,
               },
             ]
-          : [{ id: "customers", label: t("nav.customers"), icon: UserCard, href: "/customers" }],
+          : [{ id: "customers", label: t("nav.customers"), icon: IdCard, href: "/customers" }],
     },
   ];
   const activeItemId =
