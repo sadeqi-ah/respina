@@ -213,3 +213,24 @@ with `--no-ff`. Conventional Commits, no tool attribution lines.
 ### Consequences
 `main` is always releasable; parallel phases integrate continuously on `dev`. Branches must be
 brought up to date with `dev` before merging.
+
+---
+
+## ADR-011: Next.js Cache Components off
+
+- **Status:** Accepted
+- **Date:** 2026-11-21
+
+### Context
+Next.js 16 scaffolds new apps with `cacheComponents: true`. With it, reading `cookies()` outside
+a `<Suspense>` boundary is a build error, because request data can't be part of the prerendered
+static shell. Our root layout reads the `NEXT_LOCALE` cookie to set `<html lang dir>`, and every
+page is per-user data fetched through the BFF.
+
+### Decision
+Set `cacheComponents: false`. Pages render per request; client data goes through TanStack Query.
+
+### Consequences
+No Suspense plumbing around the locale and session reads, and no static shell to keep correct.
+We give up prerendering, which this authenticated dashboard can't use anyway. Revisit if public,
+cacheable pages are added.
