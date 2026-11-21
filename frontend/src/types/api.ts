@@ -24,3 +24,38 @@ export type Customer = {
   services_count: number;
   created_at: string;
 };
+
+export const SERVICE_TYPES = [
+  "cloud_server",
+  "vps",
+  "dedicated_server",
+  "object_storage",
+  "managed_database",
+] as const;
+export type ServiceType = (typeof SERVICE_TYPES)[number];
+
+export const SERVICE_STATUSES = ["active", "suspended"] as const;
+export type ServiceStatus = (typeof SERVICE_STATUSES)[number];
+
+export type StatusChangeSource = "api" | "php_module" | "admin";
+
+export type Service = {
+  id: number;
+  customer_id: number;
+  name: string;
+  service_type: ServiceType;
+  service_type_display: string;
+  status: ServiceStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StatusLog = {
+  id: number;
+  from_status: ServiceStatus;
+  to_status: ServiceStatus;
+  changed_by_id: number | null;
+  source: StatusChangeSource;
+  reason: string;
+  created_at: string;
+};

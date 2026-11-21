@@ -17,3 +17,7 @@ export function listCustomers(params: ListParams, signal?: AbortSignal): Promise
 export function createCustomer(values: CustomerValues): Promise<Customer> {
   return apiFetch<Customer>("customers", { method: "POST", body: values });
 }
+
+export function getCustomer(id: number, signal?: AbortSignal): Promise<Customer> {
+  return apiFetch<Customer>(`customers/${id}`, { signal });
+}

@@ -81,9 +81,103 @@
       "created": "{name} اضافه شد",
       "staffOnly": "فقط کارکنان می‌توانند مشتری اضافه کنند.",
       "back": "بازگشت به مشتریان"
+    },
+    "tabs": {
+      "services": "سرویس‌ها",
+      "details": "جزئیات"
+    },
+    "details": {
+      "firstName": "نام",
+      "lastName": "نام خانوادگی",
+      "email": "ایمیل",
+      "phone": "تلفن",
+      "services": "سرویس‌ها",
+      "created": "تاریخ ایجاد"
+    },
+    "notFound": {
+      "title": "مشتری پیدا نشد",
+      "detail": "این مشتری وجود ندارد یا به آن دسترسی ندارید."
     }
   },
-  "services": {},
+  "services": {
+    "tableCaption": "سرویس‌ها",
+    "count": "{count, plural, =0 {بدون سرویس} other {# سرویس}}",
+    "columns": {
+      "name": "نام",
+      "type": "نوع",
+      "status": "وضعیت",
+      "created": "تاریخ ایجاد",
+      "actions": "عملیات"
+    },
+    "actionsFor": "عملیات برای {name}",
+    "suspend": "تعلیق",
+    "activate": "فعال‌سازی",
+    "viewHistory": "مشاهدهٔ تاریخچه",
+    "cancel": "انصراف",
+    "status": {
+      "active": "فعال",
+      "suspended": "معلق"
+    },
+    "types": {
+      "cloud_server": "سرور ابری",
+      "vps": "سرور مجازی",
+      "dedicated_server": "سرور اختصاصی",
+      "object_storage": "فضای ذخیره‌سازی ابجکت",
+      "managed_database": "پایگاه دادهٔ مدیریت‌شده"
+    },
+    "filters": {
+      "status": "وضعیت",
+      "type": "نوع",
+      "all": "همه"
+    },
+    "clearFilters": "پاک کردن فیلترها",
+    "empty": {
+      "title": "هنوز سرویسی نیست",
+      "detail": "سرویس‌هایی که برای این مشتری اضافه شوند اینجا نمایش داده می‌شوند."
+    },
+    "noResults": {
+      "title": "سرویسی پیدا نشد",
+      "detail": "هیچ سرویسی با این فیلترها مطابقت ندارد."
+    },
+    "add": {
+      "title": "افزودن سرویس",
+      "detail": "سرویس‌های جدید در وضعیت فعال ایجاد می‌شوند.",
+      "name": "نام",
+      "type": "نوع",
+      "typePlaceholder": "یک نوع انتخاب کنید",
+      "submit": "افزودن سرویس",
+      "submitting": "در حال افزودن…",
+      "created": "{name} اضافه شد"
+    },
+    "statusChange": {
+      "suspendTitle": "{name} معلق شود؟",
+      "activateTitle": "{name} فعال شود؟",
+      "suspendDetail": "سرویس تا فعال‌سازی دوباره متوقف می‌شود. این تغییر در تاریخچه ثبت می‌شود.",
+      "activateDetail": "سرویس دوباره اجرا می‌شود. این تغییر در تاریخچه ثبت می‌شود.",
+      "reason": "دلیل (اختیاری)",
+      "reasonHint": "در تاریخچهٔ وضعیت نمایش داده می‌شود. حداکثر {max} نویسه.",
+      "suspended": "{name} معلق شد",
+      "activated": "{name} فعال شد",
+      "failed": "تغییر وضعیت {name} انجام نشد"
+    },
+    "history": {
+      "title": "تاریخچهٔ وضعیت",
+      "loading": "در حال بارگذاری تاریخچه",
+      "empty": "وضعیت این سرویس تاکنون تغییر نکرده است.",
+      "to": "به",
+      "byVia": "{who} از طریق {source}",
+      "who": {
+        "you": "شما",
+        "system": "سیستم",
+        "user": "کاربر #{id}"
+      },
+      "source": {
+        "api": "پنل",
+        "php_module": "ماژول PHP",
+        "admin": "پنل مدیریت"
+      }
+    }
+  },
   "errors": {
     "validation_error": "لطفاً فیلدهای مشخص‌شده را بررسی کنید.",
     "not_authenticated": "برای ادامه وارد شوید.",

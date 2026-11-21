@@ -81,9 +81,103 @@
       "created": "{name} was added",
       "staffOnly": "Only staff can add customers.",
       "back": "Back to customers"
+    },
+    "tabs": {
+      "services": "Services",
+      "details": "Details"
+    },
+    "details": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "services": "Services",
+      "created": "Created"
+    },
+    "notFound": {
+      "title": "Customer not found",
+      "detail": "It doesn't exist, or you don't have access to it."
     }
   },
-  "services": {},
+  "services": {
+    "tableCaption": "Services",
+    "count": "{count, plural, =0 {No services} one {# service} other {# services}}",
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "actionsFor": "Actions for {name}",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "viewHistory": "View history",
+    "cancel": "Cancel",
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "types": {
+      "cloud_server": "Cloud server",
+      "vps": "VPS",
+      "dedicated_server": "Dedicated server",
+      "object_storage": "Object storage",
+      "managed_database": "Managed database"
+    },
+    "filters": {
+      "status": "Status",
+      "type": "Type",
+      "all": "All"
+    },
+    "clearFilters": "Clear filters",
+    "empty": {
+      "title": "No services yet",
+      "detail": "Services added for this customer will show up here."
+    },
+    "noResults": {
+      "title": "No services match",
+      "detail": "Nothing matches these filters."
+    },
+    "add": {
+      "title": "Add service",
+      "detail": "New services start active.",
+      "name": "Name",
+      "type": "Type",
+      "typePlaceholder": "Choose a type",
+      "submit": "Add service",
+      "submitting": "Adding…",
+      "created": "{name} was added"
+    },
+    "statusChange": {
+      "suspendTitle": "Suspend {name}?",
+      "activateTitle": "Activate {name}?",
+      "suspendDetail": "The service stops until it is activated again. This is recorded in its history.",
+      "activateDetail": "The service starts running again. This is recorded in its history.",
+      "reason": "Reason (optional)",
+      "reasonHint": "Shown in the status history. Up to {max} characters.",
+      "suspended": "{name} was suspended",
+      "activated": "{name} was activated",
+      "failed": "Couldn't change the status of {name}"
+    },
+    "history": {
+      "title": "Status history",
+      "loading": "Loading history",
+      "empty": "The status of this service has never changed.",
+      "to": "to",
+      "byVia": "{who} via {source}",
+      "who": {
+        "you": "You",
+        "system": "System",
+        "user": "User #{id}"
+      },
+      "source": {
+        "api": "panel",
+        "php_module": "PHP module",
+        "admin": "admin site"
+      }
+    }
+  },
   "errors": {
     "validation_error": "Please check the highlighted fields.",
     "not_authenticated": "Please sign in to continue.",

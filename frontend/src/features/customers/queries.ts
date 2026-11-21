@@ -4,7 +4,9 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-import { createCustomer, listCustomers } from "./api";
+import { ApiError } from "@/lib/api-error";
+
+import { createCustomer, getCustomer, listCustomers } from "./api";
 import { parseListParams, toQueryString, type ListParams } from "./params";
 import type { CustomerValues } from "./schemas";
 
@@ -14,6 +16,15 @@ export const customerKeys = {
   list: (params: ListParams) => ["customers", "list", params] as const,
   detail: (id: number) => ["customers", "detail", id] as const,
 };
+
+export function useCustomer(id: number) {
+  return useQuery({
+    queryKey: customerKeys.detail(id),
+    queryFn: ({ signal }) => getCustomer(id, signal),
+    // A 404/403 won't change on retry; show not-found or the error right away.
+    retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 2,
+  });
+}
 
 export function useCustomers(params: ListParams) {
   return useQuery({
