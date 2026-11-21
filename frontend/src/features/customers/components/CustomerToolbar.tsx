@@ -45,14 +45,14 @@ export function CustomerSearch({ value, onChange }: { value: string; onChange: (
         onChange={(event) => setDraft(event.target.value)}
         placeholder={t("searchPlaceholder")}
         aria-label={t("searchLabel")}
-        className="h-8 w-full rounded-md bg-(--obsidian-dashboard-shell-control) ps-8 pe-8 text-xs text-(--obsidian-dashboard-shell-foreground) shadow-(--obsidian-dashboard-shell-control-shadow) outline-none placeholder:text-(--obsidian-dashboard-shell-text-subtle) focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) [&::-webkit-search-cancel-button]:hidden"
+        className="h-8 w-full rounded-md bg-(--obsidian-dashboard-shell-control) ps-8 pe-8 text-xs text-(--obsidian-dashboard-shell-foreground) shadow-(--obsidian-dashboard-shell-control-shadow) outline-none placeholder:text-(--obsidian-dashboard-shell-text-subtle) focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) pointer-coarse:h-11 pointer-coarse:text-base [&::-webkit-search-cancel-button]:hidden"
       />
       {draft && (
         <button
           type="button"
           onClick={() => setDraft("")}
           aria-label={t("clearSearch")}
-          className="absolute end-1.5 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded text-(--obsidian-dashboard-shell-text-subtle) hover:text-(--obsidian-dashboard-shell-foreground)"
+          className="touch-target absolute end-1.5 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded text-(--obsidian-dashboard-shell-text-subtle) hover:text-(--obsidian-dashboard-shell-foreground)"
         >
           <X aria-hidden className="size-3" />
         </button>

@@ -24,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
+  const t = await getTranslations("common");
   const dir = directions[locale];
   const font = locale === "fa" ? vazirmatn : geist;
 
@@ -35,7 +36,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <QueryProvider>
               <TooltipProvider>
                 {children}
-                <Toaster position={dir === "rtl" ? "bottom-left" : "bottom-right"} />
+                {/* The app has no dark mode yet: without theme="light" toasts follow the OS and turn dark. */}
+                <Toaster
+                  theme="light"
+                  position={dir === "rtl" ? "bottom-left" : "bottom-right"}
+                  containerAriaLabel={t("notifications")}
+                />
               </TooltipProvider>
             </QueryProvider>
           </DirectionProvider>

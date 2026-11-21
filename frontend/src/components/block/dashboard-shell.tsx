@@ -25,7 +25,7 @@ const RESIZE_STEP = 10;
 const DOCKED_SIDEBAR_REM = 42;
 
 export const dashboardButtonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-medium leading-none outline-none select-none transition-[background-color,color,box-shadow] duration-150 ease-[cubic-bezier(0.25,1,0.5,1)] focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "touch-target relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-medium leading-none outline-none select-none transition-[background-color,color,box-shadow] duration-150 ease-[cubic-bezier(0.25,1,0.5,1)] focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -146,7 +146,7 @@ export function DashboardMenuContent({ className, children, sideOffset = 6, ...p
 }
 
 const menuItemClassName =
-  "relative flex h-8 cursor-pointer select-none items-center gap-2 rounded-md px-2.5 text-xs leading-none text-(--obsidian-dashboard-shell-text-muted) outline-none transition-[color,scale] duration-150 ease-[cubic-bezier(0.25,1,0.5,1)] active:scale-[0.97] active:duration-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:text-(--obsidian-dashboard-shell-foreground) [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
+  "relative flex h-8 pointer-coarse:h-11 cursor-pointer select-none items-center gap-2 rounded-md px-2.5 text-xs leading-none text-(--obsidian-dashboard-shell-text-muted) outline-none transition-[color,scale] duration-150 ease-[cubic-bezier(0.25,1,0.5,1)] active:scale-[0.97] active:duration-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:text-(--obsidian-dashboard-shell-foreground) [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
 
 // Radix focuses items on hover and with the arrow keys, so following focus moves the highlight for both.
 function useHighlightOnFocus(onFocus?: (event: FocusEvent<HTMLDivElement>) => void, onBlur?: (event: FocusEvent<HTMLDivElement>) => void) {
@@ -339,7 +339,7 @@ export function DashboardFilterMenu({ label, value, options, onValueChange, alig
           variant="secondary"
           size="sm"
           aria-label={label ? `${label}: ${currentLabel}` : undefined}
-          className={cn("group gap-0 overflow-hidden px-0", className)}
+          className={cn("group gap-0 overflow-hidden px-0 pointer-coarse:h-11", className)}
         >
           {label && (
             <>
@@ -428,6 +428,8 @@ export type DashboardShellProps = Omit<ComponentProps<"div">, "title" | "childre
   minSidebarWidth?: number;
   maxSidebarWidth?: number;
   navigationLabel?: string;
+  /** Screen-reader labels for the shell's icon-only controls; pass translated strings. */
+  labels?: { openNavigation?: string; closeNavigation?: string; resizeSidebar?: string };
   /** Renders navigation items that have an `href`, such as Next.js `Link` for client-side routing. Defaults to `<a>`. */
   linkComponent?: ElementType;
 };
@@ -494,6 +496,7 @@ export function DashboardShell({
   minSidebarWidth = 180,
   maxSidebarWidth = 400,
   navigationLabel = "Navigation",
+  labels,
   linkComponent = "a",
   className,
   style,
@@ -629,6 +632,9 @@ export function DashboardShell({
 
   const Heading = `h${headingLevel}` as "h1" | "h2" | "h3";
 
+  const openNavigationLabel = labels?.openNavigation ?? "Open navigation";
+  const closeNavigationLabel = labels?.closeNavigation ?? "Close navigation";
+  const resizeSidebarLabel = labels?.resizeSidebar ?? "Resize sidebar";
   const sidebarProps = { brand, navigation, secondaryNavigation, footer: sidebarFooter, activeItemId: activeItem, navigationLabel };
 
   const renderHeader = (tabList?: ReactNode) => (
@@ -640,7 +646,7 @@ export function DashboardShell({
             variant="secondary"
             size="icon"
             className="@2xl/dashboard-shell:hidden"
-            aria-label="Open navigation"
+            aria-label={openNavigationLabel}
             aria-expanded={isDrawerOpen}
             aria-controls={isDrawerOpen ? drawerId : undefined}
             onClick={() => setIsDrawerOpen(true)}
@@ -701,7 +707,7 @@ export function DashboardShell({
             <div
               role="separator"
               aria-orientation="vertical"
-              aria-label="Resize sidebar"
+              aria-label={resizeSidebarLabel}
               aria-controls={sidebarId}
               aria-valuemin={minSidebarWidth}
               aria-valuemax={maxSidebarWidth}
@@ -776,7 +782,7 @@ export function DashboardShell({
                   exit={{ x: reduceMotion ? 0 : isRtl ? "100%" : "-100%" }}
                   transition={{ duration: reduceMotion ? 0 : 0.28, ease: EASE_OUT }}
                 >
-                  <SidebarContent {...sidebarProps} onSelect={selectItemFromDrawer} onClose={closeDrawer} closeButtonRef={closeButtonRef} />
+                  <SidebarContent {...sidebarProps} onSelect={selectItemFromDrawer} onClose={closeDrawer} closeButtonRef={closeButtonRef} closeNavigationLabel={closeNavigationLabel} />
                 </motion.div>
               </motion.div>
             )}
@@ -875,6 +881,7 @@ type SidebarContentProps = {
   footer?: ReactNode;
   activeItemId?: string;
   navigationLabel: string;
+  closeNavigationLabel?: string;
   onSelect: (id: string) => void;
   onClose?: () => void;
   closeButtonRef?: Ref<HTMLButtonElement>;
@@ -887,6 +894,7 @@ const SidebarContent = memo(function SidebarContent({
   footer,
   activeItemId,
   navigationLabel,
+  closeNavigationLabel = "Close navigation",
   onSelect,
   onClose,
   closeButtonRef,
@@ -905,7 +913,7 @@ const SidebarContent = memo(function SidebarContent({
           )}
         </div>
         {onClose && (
-          <DashboardButton ref={closeButtonRef} variant="ghost" size="icon" aria-label="Close navigation" onClick={onClose}>
+          <DashboardButton ref={closeButtonRef} variant="ghost" size="icon" aria-label={closeNavigationLabel} onClick={onClose}>
             <X aria-hidden />
           </DashboardButton>
         )}
@@ -995,7 +1003,7 @@ function NavItem({ item, isActive, isQuiet, pillId, onSelect }: NavItemProps) {
       if (event.pointerType !== "touch") highlight?.show(event.currentTarget);
     },
     className: cn(
-      "group relative flex h-8 w-full cursor-pointer select-none items-center gap-2 rounded-lg px-2 text-sm font-medium leading-none outline-none",
+      "group relative flex h-8 pointer-coarse:h-11 w-full cursor-pointer select-none items-center gap-2 rounded-lg px-2 text-sm font-medium leading-none outline-none",
       "transition-[color,scale] duration-150 hover:text-(--obsidian-dashboard-shell-foreground) active:scale-[0.98] active:duration-75 focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) data-[active=true]:text-(--obsidian-dashboard-shell-foreground)",
       isQuiet ? "text-(--obsidian-dashboard-shell-text-subtle)" : "text-(--obsidian-dashboard-shell-text-muted)",
     ),
@@ -1053,7 +1061,7 @@ function ShellTab({ item, isActive, pillId }: ShellTabProps) {
       onPointerEnter={(event) => {
         if (event.pointerType !== "touch") highlight?.show(event.currentTarget);
       }}
-      className="group relative grid h-7 cursor-pointer select-none place-items-center rounded-md px-2.5 text-xs leading-none text-(--obsidian-dashboard-shell-text-subtle) outline-none transition-[color,scale] duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:text-(--obsidian-dashboard-shell-foreground) focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) active:scale-[0.97] active:duration-75 data-[state=active]:text-(--obsidian-dashboard-shell-foreground)"
+      className="touch-target group relative grid h-7 cursor-pointer select-none place-items-center rounded-md px-2.5 text-xs leading-none text-(--obsidian-dashboard-shell-text-subtle) outline-none transition-[color,scale] duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:text-(--obsidian-dashboard-shell-foreground) focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) active:scale-[0.97] active:duration-75 data-[state=active]:text-(--obsidian-dashboard-shell-foreground)"
     >
       {isActive && (
         <motion.span

@@ -62,7 +62,12 @@ export function AppShell({ headerActions, ...props }: ShellProps & { headerActio
       navigation={navigation}
       activeItemId={activeItemId}
       linkComponent={Link}
-      navigationLabel={t("common.openMenu")}
+      navigationLabel={t("common.navigation")}
+      labels={{
+        openNavigation: t("common.openNavigation"),
+        closeNavigation: t("common.closeNavigation"),
+        resizeSidebar: t("common.resizeSidebar"),
+      }}
       headerActions={
         <>
           {headerActions}

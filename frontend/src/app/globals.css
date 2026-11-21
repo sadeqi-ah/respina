@@ -5,6 +5,32 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * touch-target: on touch screens, give a small control a 44×44px hit area (WCAG 2.5.5) without
+ * changing how it looks. Used on the shell's buttons and tabs, table links, sort headers, row
+ * menus and the search clear button: dense, inline controls that sit side by side.
+ * Stacked lists (menu items, drawer nav, select options) grow with pointer-coarse:h-11 instead.
+ *
+ * Contract with the call sites: the element is already positioned (relative or absolute) and
+ * does not clip its children (no overflow-hidden).
+ */
+@utility touch-target {
+  --touch-target-size: 44px;
+  @media (pointer: coarse) {
+    &::after {
+      content: "";
+      position: absolute;
+      left: 50%; /* rtl-ok: symmetric centering, correct in both directions */
+      top: 50%;
+      translate: -50% -50%;
+      /* Never smaller than the control itself, so wide buttons aren't shrunk. */
+      width: max(100%, var(--touch-target-size));
+      height: max(100%, var(--touch-target-size));
+      /* Taps here count as taps on the control (the pseudo-element belongs to it). */
+    }
+  }
+}
+
+/*
  * Yekan Bakh (fontiran.com, commercial). The file lives in public/fonts/yekanbakh/ and is
  * gitignored: it needs a web license and must never be committed (see README "Fonts").
  * Without it the fa stack falls back to Vazirmatn.

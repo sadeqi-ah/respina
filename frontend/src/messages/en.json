@@ -12,7 +12,6 @@
     "cancel": "Cancel",
     "save": "Save",
     "close": "Close",
-    "openMenu": "Open menu",
     "signOut": "Sign out",
     "account": "Account",
     "signedInAs": "Signed in as",
@@ -26,7 +25,12 @@
     "previousPage": "Previous page",
     "nextPage": "Next page",
     "pageOf": "Page {page} of {total}",
-    "results": "{count} results"
+    "results": "{count} results",
+    "navigation": "Main navigation",
+    "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
+    "resizeSidebar": "Resize sidebar",
+    "notifications": "Notifications"
   },
   "nav": {
     "customers": "Customers",

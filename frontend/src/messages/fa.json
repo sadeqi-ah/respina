@@ -12,7 +12,6 @@
     "cancel": "انصراف",
     "save": "ذخیره",
     "close": "بستن",
-    "openMenu": "باز کردن منو",
     "signOut": "خروج",
     "account": "حساب کاربری",
     "signedInAs": "واردشده با",
@@ -26,7 +25,12 @@
     "previousPage": "صفحهٔ قبل",
     "nextPage": "صفحهٔ بعد",
     "pageOf": "صفحهٔ {page} از {total}",
-    "results": "{count} نتیجه"
+    "results": "{count} نتیجه",
+    "navigation": "ناوبری اصلی",
+    "openNavigation": "باز کردن منو",
+    "closeNavigation": "بستن منو",
+    "resizeSidebar": "تغییر اندازهٔ نوار کناری",
+    "notifications": "اعلان‌ها"
   },
   "nav": {
     "customers": "مشتریان",

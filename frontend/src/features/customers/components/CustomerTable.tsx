@@ -80,14 +80,15 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
               <div className="flex min-w-0 flex-col gap-0.5">
                 <Link
                   href={`/customers/${customer.id}`}
-                  className="truncate font-medium outline-none hover:underline focus-visible:underline"
+                  className="touch-target relative max-w-full font-medium outline-none hover:underline focus-visible:underline"
                 >
-                  {customer.full_name}
+                  {/* Truncate inside: overflow-hidden on the link would clip its touch-target hit area. */}
+                  <span className="block truncate">{customer.full_name}</span>
                 </Link>
                 {/* The email moves under the name once its own column is hidden. */}
                 <bdi
                   dir="ltr"
-                  className="truncate text-xs text-(--obsidian-dashboard-shell-text-subtle) @sm/table:hidden"
+                  className="max-w-full self-start truncate text-xs text-(--obsidian-dashboard-shell-text-subtle) @sm/table:hidden"
                 >
                   {customer.email}
                 </bdi>
@@ -185,7 +186,7 @@ function SortHeader({
         type="button"
         onClick={() => onSort(sortKey)}
         className={cn(
-          "-mx-1.5 inline-flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 transition-colors duration-150 outline-none hover:bg-(--obsidian-dashboard-shell-muted) hover:text-(--obsidian-dashboard-shell-foreground) focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring)",
+          "touch-target relative -mx-1.5 inline-flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 transition-colors duration-150 outline-none hover:bg-(--obsidian-dashboard-shell-muted) hover:text-(--obsidian-dashboard-shell-foreground) focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring)",
           isActive && "text-(--obsidian-dashboard-shell-foreground)",
         )}
       >
