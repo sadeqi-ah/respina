@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -21,6 +22,18 @@ import (
 const shutdownTimeout = 10 * time.Second
 
 func main() {
+	probe := flag.Bool("healthcheck", false, "probe the local server's /health and exit 0 (healthy) or 1")
+	flag.Parse()
+
+	if *probe {
+		cfg, err := config.Load(os.Getenv)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "healthsvc:", err)
+			os.Exit(1)
+		}
+		os.Exit(healthcheck(cfg.Port))
+	}
+
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "healthsvc:", err)
 		os.Exit(1)
