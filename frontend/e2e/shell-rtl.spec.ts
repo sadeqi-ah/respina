@@ -3,24 +3,28 @@ import { join } from "node:path";
 
 import { expect, test } from "@playwright/test";
 
-// Task 2.2 visual baselines for the Dashboard Shell in both directions.
-// Targets the temporary /dashboard demo route until the real (dashboard) layout lands in 2.3.
+import en from "../src/messages/en.json";
+import fa from "../src/messages/fa.json";
+import { mockApi } from "./fixtures";
+
+// Visual baselines of the customers page in both directions (fixture data, no backend).
 const WIDTHS = [375, 768, 1280] as const;
 const LOCALES = [
-  { locale: "en", dir: "ltr" },
-  { locale: "fa", dir: "rtl" },
+  { locale: "en", dir: "ltr", messages: en },
+  { locale: "fa", dir: "rtl", messages: fa },
 ] as const;
 
 // fa baselines are drawn with Yekan Bakh, a licensed font that is gitignored; skip the pixel
 // comparison where it isn't installed (e.g. CI). The structural checks always run.
 const hasYekanBakh = existsSync(join(__dirname, "../public/fonts/yekanbakh/YekanBakh-VF.woff2"));
 
-for (const { locale, dir } of LOCALES) {
+for (const { locale, dir, messages } of LOCALES) {
   for (const width of WIDTHS) {
-    test(`shell ${locale} @${width}px`, async ({ page, context, baseURL }) => {
-      await context.addCookies([{ name: "NEXT_LOCALE", value: locale, url: baseURL! }]);
+    test(`customers ${locale} @${width}px`, async ({ page, context, baseURL }) => {
+      await mockApi(context, page, baseURL!, locale);
       await page.setViewportSize({ width, height: 800 });
-      await page.goto("/dashboard");
+      await page.goto("/customers");
+      await expect(page.getByRole("table")).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
 
       await expect(page.locator("html")).toHaveAttribute("dir", dir);
@@ -33,14 +37,14 @@ for (const { locale, dir } of LOCALES) {
 
       if (width >= 672) {
         // Docked sidebar sits on the inline-start side: left in LTR, right in RTL.
-        const handle = page.getByRole("separator", { name: "Resize sidebar" });
+        const handle = page.getByRole("separator", { name: messages.common.resizeSidebar });
         const box = (await handle.boundingBox())!;
         const centre = box.x + box.width / 2;
         if (dir === "ltr") expect(centre).toBeLessThan(width / 2);
         else expect(centre).toBeGreaterThan(width / 2);
       } else {
         // Mobile: the drawer opens flush against the inline-start edge.
-        await page.getByRole("button", { name: "Open navigation" }).click();
+        await page.getByRole("button", { name: messages.common.openNavigation }).click();
         const drawer = page.locator('[role="dialog"][aria-modal="true"]');
         await expect(drawer).toBeVisible();
         await page.waitForTimeout(400); // slide-in animation
@@ -52,7 +56,9 @@ for (const { locale, dir } of LOCALES) {
       }
 
       test.skip(locale === "fa" && !hasYekanBakh, "Yekan Bakh not installed; pixel baseline skipped");
-      await expect(page).toHaveScreenshot(`shell-${locale}-${width}.png`, {
+      // Next's dev-only indicator would make dev and production screenshots differ.
+      await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
+      await expect(page).toHaveScreenshot(`customers-${locale}-${width}.png`, {
         fullPage: false,
         animations: "disabled",
       });

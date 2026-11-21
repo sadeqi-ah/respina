@@ -15,7 +15,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except the login page, API routes, Next assets, public files and the temporary
-  // /dashboard demo route (removed with the 2.2 baselines in Task 2.8).
-  matcher: ["/((?!login|api/|_next/|fonts/|favicon\\.ico|dashboard).*)"],
+  // Everything except the login page, API routes, Next assets and public files.
+  matcher: ["/((?!login|api/|_next/|fonts/|favicon\\.ico).*)"],
 };
