@@ -182,6 +182,8 @@ JWT_REFRESH_TTL_DAYS=7
 SEED_ADMIN_EMAIL=admin@example.com
 SEED_ADMIN_PASSWORD=change-me-admin
 SEED_CUSTOMER_PASSWORD=change-me-customer
+# Required for `seed --reset` (deletes all customers/services). Leave unset outside dev.
+# SEED_ALLOW_RESET=true
 
 # --- Next.js (server-side only; never NEXT_PUBLIC_) ---
 DJANGO_API_URL=http://backend:8000
