@@ -46,3 +46,12 @@ DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["test_*.py"]
 addopts = "--reuse-db -p no:cacheprovider"
 filterwarnings = ["ignore:No directory at:UserWarning"]
+
+[tool.coverage.run]
+source = ["apps"]
+omit = ["*/tests/*", "*/migrations/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 0  # reported, not gating (plan 1.8 target: >= 85%)
