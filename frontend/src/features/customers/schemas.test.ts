@@ -1,4 +1,8 @@
+import { createTranslator } from "next-intl";
 import { describe, expect, it } from "vitest";
+
+import en from "@/messages/en.json";
+import fa from "@/messages/fa.json";
 
 import { isPlausiblePhone, makeCustomerSchema } from "./schemas";
 
@@ -63,5 +67,33 @@ describe("makeCustomerSchema", () => {
       email: "invalid_email",
       phone: "invalid_phone",
     });
+  });
+});
+
+describe.each([
+  ["en", en],
+  ["fa", fa],
+] as const)("makeCustomerSchema with %s messages", (locale, messages) => {
+  const localized = makeCustomerSchema(createTranslator({ locale, messages, namespace: "validation" }));
+
+  it("reports each problem in the locale's own words", () => {
+    const result = localized.safeParse({ first_name: "", last_name: "Ahmadi", email: "nope", phone: "abc" });
+    const issues = Object.fromEntries(result.error!.issues.map((i) => [i.path[0], i.message]));
+    expect(issues).toEqual({
+      first_name: messages.validation.required,
+      email: messages.validation.invalid_email,
+      phone: messages.validation.invalid_phone,
+    });
+  });
+
+  it("accepts the phone in Persian digits", () => {
+    expect(
+      localized.safeParse({
+        first_name: "سارا",
+        last_name: "احمدی",
+        email: "s@example.com",
+        phone: "۰۹۱۲۱۲۳۴۵۶۷",
+      }).success,
+    ).toBe(true);
   });
 });
