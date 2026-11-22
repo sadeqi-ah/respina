@@ -1,9 +1,12 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useContext,
+  useEffect,
   useLayoutEffect,
+  useRef,
   useState,
   type ComponentProps,
   type ReactNode,
@@ -24,11 +27,43 @@ const SetShellConfig = createContext<((config: ShellConfig | null) => void) | nu
  */
 export function ShellFrame({ fallback, children }: { fallback: ShellConfig; children: ReactNode }) {
   const [config, setConfig] = useState<ShellConfig | null>(null);
+  const content = useRouteFade();
   return (
     <SetShellConfig.Provider value={setConfig}>
-      <AppShell {...(config ?? fallback)}>{children}</AppShell>
+      <AppShell {...(config ?? fallback)}>
+        {/* A grid, so the page (min-h-full) still fills the scroll area through this wrapper. */}
+        <div ref={content} className="grid min-h-full">
+          {children}
+        </div>
+      </AppShell>
     </SetShellConfig.Provider>
   );
+}
+
+export const ROUTE_FADE_MS = 120;
+
+/**
+ * Fades the content area in when the route changes, never the shell. Opacity only (a transform
+ * would make the scroll area the containing block of fixed elements), skipped under reduced
+ * motion and while the theme switch's view transition owns the screen.
+ */
+function useRouteFade() {
+  const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const shown = useRef(pathname);
+  useEffect(() => {
+    if (shown.current === pathname) return;
+    shown.current = pathname;
+    const element = ref.current;
+    if (!element?.animate || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if ((document as Document & { activeViewTransition?: unknown }).activeViewTransition) return;
+    const animation = element.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: ROUTE_FADE_MS,
+      easing: "ease-out",
+    });
+    return () => animation.cancel();
+  }, [pathname]);
+  return ref;
 }
 
 /**
