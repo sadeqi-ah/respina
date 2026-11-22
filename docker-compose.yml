@@ -46,6 +46,7 @@ services:
       JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public.pem
       JWT_ACCESS_TTL_MINUTES: ${JWT_ACCESS_TTL_MINUTES:-15}
       JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-7}
+      DB_LOCK_TIMEOUT: ${DB_LOCK_TIMEOUT:-3s}
     secrets: &backend-secrets
       - source: jwt_private
         target: jwt_private.pem
@@ -99,6 +100,7 @@ services:
       JWT_PUBLIC_KEY_PATH_PHP: /run/secrets/jwt_public.pem
       DJANGO_API_URL_PHP: http://backend:8000
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      DB_LOCK_TIMEOUT: ${DB_LOCK_TIMEOUT:-3s}
     secrets:
       - source: jwt_public # verify only: the PHP module can never sign a token
         target: jwt_public.pem

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Respina\Repository;
 
 use PDO;
+use PDOException;
 use Respina\Auth\AuthContext;
+use Respina\Config;
 use Respina\Domain\ServiceStatus;
 use Respina\Http\HttpException;
 use Throwable;
@@ -18,9 +20,13 @@ final class ServiceRepository
 {
     private const COLUMNS = 's.id, s.customer_id, s.name, s.service_type, s.status, s.created_at, s.updated_at';
     private const VISIBLE = '(:is_staff OR s.customer_id = :own_customer_id)';
+    private const LOCK_NOT_AVAILABLE = '55P03';
 
-    public function __construct(private readonly PDO $db)
-    {
+    public function __construct(
+        private readonly PDO $db,
+        private readonly string $lockTimeout = Config::DEFAULT_LOCK_TIMEOUT,
+        private readonly string $requestId = '',
+    ) {
     }
 
     /**
@@ -57,6 +63,12 @@ final class ServiceRepository
     ): array {
         $this->db->beginTransaction();
         try {
+            // Bound the lock wait for this transaction only (= SET LOCAL; SET can't take a bound
+            // parameter). A holder longer than this gets 409 service_busy, not an endless wait.
+            $timeout = $this->db->prepare("SELECT set_config('lock_timeout', :timeout, true)");
+            $timeout->bindValue(':timeout', $this->lockTimeout);
+            $timeout->execute();
+
             // FOR UPDATE OF s: lock only the service row (php_module may UPDATE services only).
             $stmt = $this->db->prepare(
                 'SELECT s.status FROM services s
@@ -102,6 +114,15 @@ final class ServiceRepository
             $this->db->commit();
         } catch (Throwable $e) {
             $this->db->rollBack();
+            if ($e instanceof PDOException && $e->getCode() === self::LOCK_NOT_AVAILABLE) {
+                error_log(sprintf(
+                    '[%s] WARNING service_busy: service %d still locked after lock_timeout %s',
+                    $this->requestId,
+                    $serviceId,
+                    $this->lockTimeout,
+                ));
+                throw HttpException::serviceBusy();
+            }
             throw $e;
         }
 

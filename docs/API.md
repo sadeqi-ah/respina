@@ -204,6 +204,7 @@ the `X-Request-ID` header) when reporting a problem: it appears in every compone
 | 404 | `not_found` | Missing, **or not visible to the caller** |
 | 405 | `method_not_allowed` | Wrong HTTP method (`Allow` header set) |
 | 409 | `invalid_status_transition` | The service already has that status |
+| 409 | `service_busy` | Another request is changing the same service and held its row lock longer than `DB_LOCK_TIMEOUT` (default 3 s); safe to retry |
 | 409 | `conflict` | A uniqueness race the validators couldn't see (concurrent creates) |
 | 429 | `throttled` | Too many login/refresh attempts (`Retry-After` header) |
 | 500 | `internal_error` | Unexpected failure; no stack trace is ever returned |

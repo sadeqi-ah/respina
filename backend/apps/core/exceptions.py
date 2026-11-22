@@ -15,7 +15,7 @@ from rest_framework import exceptions, status
 from rest_framework.response import Response
 from rest_framework.views import exception_handler as drf_exception_handler
 
-from .errors import DomainError, InvalidStatusTransition
+from .errors import DomainError, InvalidStatusTransition, ServiceBusy
 from .request_context import get_request_id
 
 logger = logging.getLogger(__name__)
@@ -33,6 +33,12 @@ class InvalidStatusTransitionError(exceptions.APIException):
     status_code = status.HTTP_409_CONFLICT
     default_detail = InvalidStatusTransition.default_message
     default_code = InvalidStatusTransition.code
+
+
+class ServiceBusyError(exceptions.APIException):
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = ServiceBusy.default_message
+    default_code = ServiceBusy.code
 
 
 # Stable public codes per DRF exception type. Order matters: subclasses first.
@@ -73,6 +79,8 @@ def _translate(exc: Exception) -> Exception:
         return Conflict("A resource with these values already exists.")
     if isinstance(exc, InvalidStatusTransition):
         return InvalidStatusTransitionError(exc.message)
+    if isinstance(exc, ServiceBusy):
+        return ServiceBusyError(exc.message)
     if isinstance(exc, DomainError):
         return Conflict(exc.message)
     return exc

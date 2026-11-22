@@ -13,3 +13,10 @@ class DomainError(Exception):
 class InvalidStatusTransition(DomainError):
     code = "invalid_status_transition"
     default_message = "This status change is not allowed."
+
+
+class ServiceBusy(DomainError):
+    """Another transaction held the service row longer than DB_LOCK_TIMEOUT."""
+
+    code = "service_busy"
+    default_message = "The service is being changed by another request. Try again."

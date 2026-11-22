@@ -51,6 +51,7 @@ Error codes beyond the shared table: `csrf_failed` (403, HTML forms), `unsupport
 | `JWT_PUBLIC_KEY_PATH_PHP` | path to Django's public key (never the private key) |
 | `DJANGO_API_URL_PHP` | e.g. `http://backend:8000` |
 | `COOKIE_SECURE` | `true` behind HTTPS: session cookie gets `Secure` |
+| `DB_LOCK_TIMEOUT` | max wait for the service row lock in a status change (default `3s`); then `409 service_busy` |
 
 ## Security
 

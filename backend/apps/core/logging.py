@@ -6,7 +6,7 @@ from .request_context import get_request_id
 
 # Fields that callers may attach with `extra=` (see RequestTimingMiddleware). Only these are
 # copied into the JSON, and only when present, so other log lines keep their exact shape.
-EXTRA_FIELDS = ("method", "path", "status", "duration_ms")
+EXTRA_FIELDS = ("method", "path", "status", "duration_ms", "service_id")
 
 
 class RequestIDFilter(logging.Filter):

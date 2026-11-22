@@ -291,3 +291,33 @@ rejected as blacklisted, and the user is signed out.
   would need sticky sessions or a shared store (e.g. Redis, which we don't add today).
 - `token_blacklist_outstandingtoken` grows with every issued token; `manage.py flushexpiredtokens`
   prunes it (to be scheduled with the stack in Phase 5).
+
+## ADR-014: Bounded row-lock wait for status changes (`SET LOCAL lock_timeout`, 409 `service_busy`)
+
+- **Status:** Accepted
+- **Date:** 2026-11-22
+
+### Context
+Both status-change paths (Django `change_service_status`, PHP `ServiceRepository::changeStatus`)
+lock the service row with `SELECT … FOR UPDATE`. Nothing set `lock_timeout` or
+`statement_timeout`, so a request queued behind a stuck transaction waited indefinitely and only
+looked slow: no error, no log line, a worker tied up.
+
+### Decision
+- At the start of each status-change transaction, before the `FOR UPDATE`, set `lock_timeout`
+  from `DB_LOCK_TIMEOUT` (default `3s`), transaction-local.
+- **Transaction-local, not per session.** Django keeps connections open (`CONN_MAX_AGE=60`); a
+  session-level `SET` would stay on the connection and apply to whatever request reuses it. We use
+  `set_config('lock_timeout', $1, true)`, which Postgres defines as equivalent to `SET LOCAL`, because
+  `SET` can't take a bound parameter (psycopg 3 binds server-side; the PHP sql-guard forbids
+  building SQL strings). The value is also validated at startup (`3s`, `500ms`, `1min`).
+- **409 Conflict, code `service_busy`.** Postgres raises `lock_not_available` (`55P03`). It's not
+  a server fault (500) or an overload (503): the resource is in use by a concurrent change, which is
+  what 409 means, and it matches `invalid_status_transition`. Clients can retry. The event is logged
+  at WARNING with `request_id` and `service_id`.
+
+### Consequences
+- A stuck holder costs a waiter at most `DB_LOCK_TIMEOUT`, and shows up in the logs.
+- Under heavy contention on one service some changes fail with `service_busy` instead of queueing;
+  the UI shows a retry message.
+- `lock_timeout` bounds only the lock wait, not slow queries; `statement_timeout` stays unset.
