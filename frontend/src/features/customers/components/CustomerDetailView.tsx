@@ -2,7 +2,7 @@
 
 import { AddCircle } from "@duo-icons/react";
 import { useTranslations } from "next-intl";
-import { notFound, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { notFound, usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, type MouseEvent } from "react";
 
 import { DashboardButton } from "@/components/block/dashboard-shell";
@@ -22,6 +22,7 @@ import { useShellConfig } from "@/features/shell/shell-config";
 import { useMinimumPending } from "@/hooks/use-minimum-pending";
 import { useReturnFocus } from "@/hooks/use-return-focus";
 import { ApiError } from "@/lib/api-error";
+import { replaceUrl } from "@/lib/replace-url";
 
 import { RETURN_PARAM } from "../params";
 import { useCustomer } from "../queries";
@@ -30,7 +31,6 @@ import { CustomerDetails, CustomerDetailsSkeleton } from "./CustomerDetails";
 
 function useDetailParams() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
   const params = useMemo(() => parseDetailParams(new URLSearchParams(searchParams)), [searchParams]);
   // The list view this page was opened from; kept across tab and filter changes for the back link.
@@ -42,9 +42,9 @@ function useDetailParams() {
       const query = new URLSearchParams(toDetailQuery(next));
       if (from) query.set(RETURN_PARAM, from);
       const qs = query.toString();
-      router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+      replaceUrl(`${pathname}${qs ? `?${qs}` : ""}`);
     },
-    [from, params, pathname, router],
+    [from, params, pathname],
   );
   return [params, setParams] as const;
 }

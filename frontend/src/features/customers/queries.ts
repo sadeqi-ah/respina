@@ -7,10 +7,11 @@ import {
   useQueryClient,
   type QueryClient,
 } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import { ApiError } from "@/lib/api-error";
+import { replaceUrl } from "@/lib/replace-url";
 import type { Customer, Page } from "@/types/api";
 
 import { createCustomer, getCustomer, listCustomers } from "./api";
@@ -67,7 +68,6 @@ export function useCustomers(params: ListParams) {
 /** List params from the URL, plus a setter that replaces the URL (no history entry per keystroke). */
 export function useListParams() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
   const params = useMemo(() => parseListParams(new URLSearchParams(searchParams)), [searchParams]);
 
@@ -75,9 +75,9 @@ export function useListParams() {
     (patch: Partial<ListParams>) => {
       // Any change other than the page itself goes back to page 1.
       const next = { ...params, ...patch, page: patch.page ?? 1 };
-      router.replace(`${pathname}${toQueryString(next)}`, { scroll: false });
+      replaceUrl(`${pathname}${toQueryString(next)}`);
     },
-    [params, pathname, router],
+    [params, pathname],
   );
 
   return [params, setParams] as const;
