@@ -1,0 +1,13 @@
+# Build context for frontend/Dockerfile: only what `next build` needs.
+node_modules
+.next
+out
+coverage
+test-results
+playwright-report
+e2e
+.env*
+!.env.example
+*.tsbuildinfo
+Dockerfile
+.dockerignore

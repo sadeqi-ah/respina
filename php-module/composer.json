@@ -1,0 +1,29 @@
+{
+    "name": "respina/php-module",
+    "description": "Customer services module: view a customer's services and change their status.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.3",
+        "firebase/php-jwt": "^7.2"
+    },
+    "autoload": {
+        "psr-4": { "Respina\\": "src/" },
+        "files": ["src/helpers.php"]
+    },
+    "autoload-dev": {
+        "psr-4": { "Respina\\Tests\\": "tests/" }
+    },
+    "config": {
+        "platform": { "php": "8.3.0" },
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.3",
+        "phpunit/phpunit": "^12.5"
+    }
+}
