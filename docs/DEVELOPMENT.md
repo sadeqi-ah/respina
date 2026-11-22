@@ -28,8 +28,6 @@ Notes:
   variables always win. Tests use PostgreSQL, not SQLite, so CHECK constraints, expression
   indexes and row locks behave as in production.
 - **frontend**: `npm run dev` uses Turbopack. The language comes from the `NEXT_LOCALE` cookie.
-  The Persian font (Yekan Bakh) is licensed and gitignored; without it, `fa` falls back to
-  Vazirmatn and the `fa` screenshot comparisons are skipped.
 - **health-service**: to read the real database, set `HEALTH_DATABASE_URL` to the `health_ro` URL
   with `localhost` as the host.
 - **php-module**: there's no local PHP requirement; the `dev` stage of `docker/Dockerfile` has PHP

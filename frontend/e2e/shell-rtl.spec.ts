@@ -1,6 +1,3 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-
 import { expect, test } from "@playwright/test";
 
 import en from "../src/messages/en.json";
@@ -13,10 +10,6 @@ const LOCALES = [
   { locale: "en", dir: "ltr", messages: en },
   { locale: "fa", dir: "rtl", messages: fa },
 ] as const;
-
-// fa baselines are drawn with Yekan Bakh, a licensed font that is gitignored; skip the pixel
-// comparison where it isn't installed (e.g. CI). The structural checks always run.
-const hasYekanBakh = existsSync(join(__dirname, "../public/fonts/yekanbakh/YekanBakh-VF.woff2"));
 
 for (const { locale, dir, messages } of LOCALES) {
   for (const width of WIDTHS) {
@@ -55,7 +48,6 @@ for (const { locale, dir, messages } of LOCALES) {
         await expect(drawer).toBeHidden();
       }
 
-      test.skip(locale === "fa" && !hasYekanBakh, "Yekan Bakh not installed; pixel baseline skipped");
       // Next's dev-only indicator would make dev and production screenshots differ.
       await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
       await expect(page).toHaveScreenshot(`customers-${locale}-${width}.png`, {
