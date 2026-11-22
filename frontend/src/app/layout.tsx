@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
+import { Estedad, Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
@@ -12,11 +12,11 @@ import { directions } from "@/i18n/config";
 
 import "./globals.css";
 
-// en: Geist. fa: Yekan Bakh (self-hosted, see globals.css) with Vazirmatn as the fallback.
+// en: Geist. fa: Estedad (variable, wght 100–900).
 // Only the current locale's font class is applied, so only its family is used. next/font still
 // preloads every font this module declares (per route, at build time), whichever locale renders.
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
-const vazirmatn = Vazirmatn({ variable: "--font-vazirmatn", subsets: ["arabic", "latin"] });
+const estedad = Estedad({ variable: "--font-estedad", subsets: ["arabic", "latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 /** Never locale-dependent; see the comment in RootLayout (layout.test.tsx holds it to that). */
@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   const t = await getTranslations("common");
   const dir = directions[locale];
-  const font = locale === "fa" ? vazirmatn : geist;
+  const font = locale === "fa" ? estedad : geist;
 
   return (
     // next-themes adds the theme class to <html> outside React, so React must never rewrite its

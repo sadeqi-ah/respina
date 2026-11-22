@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // next/font only works inside Next's compiler; each font just needs a distinct variable class.
 vi.mock("next/font/google", () => {
   const font = ({ variable }: { variable: string }) => ({ variable: `font${variable}`, className: "" });
-  return { Geist: font, Geist_Mono: font, Vazirmatn: font };
+  return { Estedad: font, Geist: font, Geist_Mono: font };
 });
 
 let locale = "en";
@@ -47,8 +47,8 @@ describe("RootLayout", () => {
     const en = (await renderFor("en")).body.className;
     const fa = (await renderFor("fa")).body.className;
     expect(en).toContain("font--font-geist ");
-    expect(en).not.toContain("--font-vazirmatn");
-    expect(fa).toContain("font--font-vazirmatn ");
+    expect(en).not.toContain("--font-estedad");
+    expect(fa).toContain("font--font-estedad ");
     expect(fa).not.toContain("--font-geist ");
     expect(en).toContain("font--font-geist-mono");
   });

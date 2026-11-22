@@ -16,18 +16,10 @@ The language comes from the `NEXT_LOCALE` cookie (`en` | `fa`, no URL prefix).
 
 ## Fonts
 
-| Locale        | Font                                                   | Source                      |
-| ------------- | ------------------------------------------------------ | --------------------------- |
-| `en`          | Geist                                                  | `next/font/google`          |
-| `fa`          | Yekan Bakh (variable: `wght` 100–950, `wdth` 62.5–150) | self-hosted, **not in git** |
-| `fa` fallback | Vazirmatn                                              | `next/font/google`          |
+| Locale | Font    | Source             |
+| ------ | ------- | ------------------ |
+| `en`   | Geist   | `next/font/google` |
+| `fa`   | Estedad | `next/font/google` |
 
-Yekan Bakh is a commercial font from fontiran.com. Its licence forbids redistributing the files
-and requires a registered web licence for use on a server, so the file is gitignored. To use it
-locally, copy `02 Variable/webfonts/YekanBakh-VF.woff2` from the purchased package to
-`public/fonts/yekanbakh/YekanBakh-VF.woff2`. Without it, Persian text falls back to Vazirmatn and
-the `fa` screenshot baselines are skipped.
-
-Use the variable axes through standard CSS: `font-weight` (Tailwind `font-medium`, `font-bold`, …)
-and `font-stretch` (`font-stretch-condensed`, `font-stretch-[87.5%]`, …). Don't set
-`font-variation-settings` directly; it would override both axes everywhere.
+Estedad is a variable font (`wght` 100–900). Use weights through standard CSS (`font-weight`,
+Tailwind `font-medium`, `font-bold`, …), not `font-variation-settings`.

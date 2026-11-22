@@ -665,7 +665,7 @@ Next.js (App Router, `output: "standalone"`), TypeScript strict, TanStack Query 
 | App shell | Obsidian UI **Dashboard Shell** | sidebar navigation, header (title, status, actions), tabs, toolbar (filters, primary action), scrolling content, mobile drawer |
 | Table patterns | Obsidian UI **dashboard-shell-page** | sortable headers, progressive column hiding, row menus, empty states, confirmations |
 | Icons | `@duo-icons/react` (navigation) + `lucide-react` (inside shadcn components) | |
-| Fonts | Geist (en), Vazirmatn (fa) via `next/font` | |
+| Fonts | Geist (en), Estedad (fa) via `next/font` | |
 
 Obsidian UI is a **shadcn registry**. Its blocks install through the shadcn CLI into `src/components/block/` as regular source files that we own and edit:
 
@@ -695,7 +695,7 @@ npx shadcn@latest add "https://www.obsidianui.dev/r/dashboard-shell-page.json"  
 | Messages | `src/messages/{en,fa}.json`, namespaced (`common`, `auth`, `customers`, `services`, `errors`, `validation`). Keys are type-checked via next-intl `AppConfig` augmentation; a test asserts both files have identical key sets |
 | `<html>` | `lang` and `dir` set from the locale in the root layout |
 | Radix / shadcn direction | Radix `DirectionProvider` with the current direction (menu alignment, tab arrow keys) |
-| Fonts | Geist (en) / Vazirmatn (fa), chosen by locale |
+| Fonts | Geist (en) / Estedad (fa), chosen by locale |
 | Dates / numbers | next-intl `useFormatter`; `fa` uses the Persian calendar (`fa-IR-u-ca-persian`) and Persian digits; `en` uses `dateStyle: "medium"` |
 | Mixed-direction data | emails, phone numbers and IDs are wrapped in `<bdi dir="ltr">` |
 | Client validation | Zod schemas are built by factories that receive `t` (`makeCustomerSchema(t)`) |
