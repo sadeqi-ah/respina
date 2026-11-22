@@ -37,7 +37,7 @@ Notes:
 
 | Target | Does |
 |---|---|
-| `make env` | Create `.env` from `.env.example` (never overwrites) |
+| `make env` | Create `.env` and `backend/.env` from their examples (never overwrites) |
 | `make keys` | Generate the JWT keypair in `secrets/` (keeps existing keys) |
 | `make build` | Build all images |
 | `make up` | Build and start the stack, return when every service is healthy |

@@ -18,9 +18,11 @@ JWT_KEY_MODE ?= $(if $(filter Linux,$(shell uname -s)),644,600)
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-env: ## Create .env from .env.example (never overwrites)
+env: ## Create .env and backend/.env from their examples (never overwrites)
 	@if [ -f .env ]; then echo ".env already exists, leaving it untouched"; \
 	else cp .env.example .env && echo "created .env from .env.example"; fi
+	@if [ -f backend/.env ]; then echo "backend/.env already exists, leaving it untouched"; \
+	else cp backend/.env.example backend/.env && echo "created backend/.env from backend/.env.example"; fi
 
 keys: ## Generate the RS256 JWT keypair into secrets/ (idempotent)
 	@mkdir -p $(SECRETS_DIR)
@@ -65,13 +67,13 @@ ifneq ($(HAS_BACKEND),)
 	cd backend && uv run pytest
 endif
 ifneq ($(HAS_FRONTEND),)
-	cd frontend && npm test
+	cd frontend && { [ -d node_modules ] || npm ci --no-audit --no-fund; } && npm test
 endif
 ifneq ($(HAS_GO),)
 	cd health-service && go test -race ./...
 endif
 ifneq ($(HAS_PHP),)
-	cd php-module && vendor/bin/phpunit
+	cd php-module && { [ -d vendor ] || composer install --no-interaction --no-progress; } && vendor/bin/phpunit
 endif
 	@echo "test: done"
 
