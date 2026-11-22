@@ -48,7 +48,9 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
   return (
     <table className="w-full border-collapse text-start text-sm">
       <caption className="sr-only">{t("tableCaption")}</caption>
-      <thead>
+      {/* Pinned to the top of the shell's scroll area. With border-collapse the row's border stays
+          behind when the header sticks, so each cell draws its own bottom rule as an inset shadow. */}
+      <thead className="sticky top-0 z-10 bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]">
         <tr className="border-y border-(--obsidian-dashboard-shell-border) text-xs text-(--obsidian-dashboard-shell-text-subtle)">
           <SortHeader label={t("columns.name")} sortKey="name" sort={sort} onSort={onSort} />
           <th scope="col" className={cn(cell, hideBelow.email, "font-normal")}>
@@ -72,7 +74,8 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
           </th>
         </tr>
       </thead>
-      <tbody>
+      {/* Anything scrolled into view (keyboard focus, find-in-page) stops below the pinned header. */}
+      <tbody className="[&_*]:scroll-mt-12">
         {customers.map((customer) => (
           <tr
             key={customer.id}

@@ -34,7 +34,9 @@ export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShow
   return (
     <table className="w-full border-collapse text-start text-sm">
       <caption className="sr-only">{t("tableCaption")}</caption>
-      <thead>
+      {/* Pinned to the top of the shell's scroll area. With border-collapse the row's border stays
+          behind when the header sticks, so each cell draws its own bottom rule as an inset shadow. */}
+      <thead className="sticky top-0 z-10 bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]">
         <tr className="border-y border-(--obsidian-dashboard-shell-border) text-xs text-(--obsidian-dashboard-shell-text-subtle)">
           <th scope="col" className={cn(cell, "font-normal")}>
             {t("columns.name")}
@@ -53,7 +55,8 @@ export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShow
           </th>
         </tr>
       </thead>
-      <tbody>
+      {/* Anything scrolled into view (keyboard focus, find-in-page) stops below the pinned header. */}
+      <tbody className="[&_*]:scroll-mt-12">
         {services.map((service) => (
           <tr
             key={service.id}

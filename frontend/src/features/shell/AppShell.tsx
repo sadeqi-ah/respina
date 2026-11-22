@@ -24,6 +24,7 @@ import {
 import { useMe } from "@/features/auth/queries";
 import { setLocale } from "@/i18n/actions";
 import { locales } from "@/i18n/config";
+import { cn } from "@/lib/utils";
 
 type ShellProps = Omit<
   ComponentProps<typeof DashboardShell>,
@@ -31,7 +32,7 @@ type ShellProps = Omit<
 >;
 
 /** The Obsidian Dashboard Shell with our brand, role-based navigation and user menu. */
-export function AppShell({ headerActions, ...props }: ShellProps & { headerActions?: ReactNode }) {
+export function AppShell({ headerActions, className, ...props }: ShellProps & { headerActions?: ReactNode }) {
   const t = useTranslations();
   const pathname = usePathname();
   const { data: me } = useMe();
@@ -58,6 +59,10 @@ export function AppShell({ headerActions, ...props }: ShellProps & { headerActio
   return (
     <DashboardShell
       {...props}
+      // The shell scrolls its content area itself, so it needs a definite height: <body> only has
+      // min-h-full, which would let h-full resolve to auto and the whole page scroll instead.
+      // dvh follows the mobile browser's collapsing URL bar.
+      className={cn("h-dvh", className)}
       brand={{ name: t("common.appName"), description: me ? t(`common.roles.${me.role}`) : undefined }}
       navigation={navigation}
       activeItemId={activeItemId}
