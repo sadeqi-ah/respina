@@ -122,7 +122,8 @@ export function AddServiceDialog({ customerId, open, onOpenChange, onCloseAutoFo
             </Field>
           </FieldGroup>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            {/* type="button": inside the form a plain <button> submits, which would validate first. */}
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               {t("cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
