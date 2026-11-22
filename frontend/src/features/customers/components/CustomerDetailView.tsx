@@ -19,6 +19,7 @@ import {
   type Tab,
 } from "@/features/services/params";
 import { useShellConfig } from "@/features/shell/shell-config";
+import { useMinimumPending } from "@/hooks/use-minimum-pending";
 import { useReturnFocus } from "@/hooks/use-return-focus";
 import { ApiError } from "@/lib/api-error";
 
@@ -61,6 +62,7 @@ export function CustomerDetailView({ id }: { id: number }) {
     setAdding(true);
   };
   const isStaff = me?.role === "staff"; // UX only: the API enforces it
+  const loadingCustomer = useMinimumPending(customer.isPending);
 
   // Invisible and missing customers are both 404 from the API (scoping never leaks with a 403).
   if (customer.error instanceof ApiError && customer.error.status === 404) notFound();
@@ -82,7 +84,12 @@ export function CustomerDetailView({ id }: { id: number }) {
   let body;
   if (customer.isError) body = <ErrorState error={customer.error} onRetry={() => customer.refetch()} />;
   else if (params.tab === "details")
-    body = customer.isPending ? <CustomerDetailsSkeleton /> : <CustomerDetails customer={customer.data} />;
+    body =
+      loadingCustomer || customer.isPending ? (
+        <CustomerDetailsSkeleton />
+      ) : (
+        <CustomerDetails customer={customer.data} />
+      );
   else
     // The services load alongside the customer rather than after it.
     body = (

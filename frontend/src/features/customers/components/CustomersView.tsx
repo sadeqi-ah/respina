@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/states/EmptyState";
 import { ErrorState } from "@/components/states/ErrorState";
 import { useMe } from "@/features/auth/queries";
 import { useShellConfig } from "@/features/shell/shell-config";
+import { useMinimumPending } from "@/hooks/use-minimum-pending";
 
 import { nextOrdering } from "../params";
 import { useCustomers, useListParams } from "../queries";
@@ -22,6 +23,7 @@ export function CustomersView() {
   const [params, setParams] = useListParams();
   const query = useCustomers(params);
   const isStaff = me?.role === "staff"; // UX only: the API enforces who may create
+  const loading = useMinimumPending(query.isPending);
 
   const newCustomer = isStaff ? (
     <Link href="/customers/new" className={dashboardButtonVariants({ variant: "primary", size: "sm" })}>
@@ -31,7 +33,7 @@ export function CustomersView() {
   ) : null;
 
   let body;
-  if (query.isPending) body = <CustomerTableSkeleton params={params} />;
+  if (loading || query.isPending) body = <CustomerTableSkeleton params={params} />;
   else if (query.isError) body = <ErrorState error={query.error} onRetry={() => query.refetch()} />;
   else if (query.data.count === 0 && params.search)
     body = (

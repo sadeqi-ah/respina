@@ -7,6 +7,7 @@ import { DashboardButton } from "@/components/block/dashboard-shell";
 import { Pagination } from "@/components/Pagination";
 import { EmptyState } from "@/components/states/EmptyState";
 import { ErrorState } from "@/components/states/ErrorState";
+import { useMinimumPending } from "@/hooks/use-minimum-pending";
 import { useReturnFocus } from "@/hooks/use-return-focus";
 import type { Service } from "@/types/api";
 
@@ -44,11 +45,11 @@ export function ServicesTab({
   const historyFocus = useReturnFocus();
   const [historyOf, setHistoryOf] = useState<Service | null>(null);
   const filtered = filters.status !== null || filters.type !== null;
-  const loading = query.isPending || (query.isError && customerPending);
+  const loading = useMinimumPending(query.isPending || (query.isError && customerPending));
   const rows = serviceSkeletonRows(filtered || filters.page > 1 ? undefined : servicesCount);
 
   let body;
-  if (loading) body = <ServiceTableSkeleton rows={rows} />;
+  if (loading || query.isPending) body = <ServiceTableSkeleton rows={rows} />;
   else if (query.isError) body = <ErrorState error={query.error} onRetry={() => query.refetch()} />;
   else if (query.data.count === 0 && filtered)
     body = (

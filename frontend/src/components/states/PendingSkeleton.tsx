@@ -1,11 +1,18 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** A loading placeholder shaped like the content it stands for. Screen readers hear "Loading…". */
+import { skeletonMounted, skeletonUnmounted } from "./skeleton-timing";
+
+/**
+ * A loading placeholder shaped like the content it stands for. Screen readers hear "Loading…" at
+ * once; on screen it stays invisible for the first DELAY_MS (a CSS animation delay, so it also
+ * holds for server-rendered and Suspense fallbacks) and then fades in. A skeleton that takes over
+ * from another one carries on with that one's timing, so the swap doesn't blink.
+ */
 export function PendingSkeleton({
   kind,
   className,
@@ -17,8 +24,23 @@ export function PendingSkeleton({
   children: ReactNode;
 }) {
   const t = useTranslations("common");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const delay = skeletonMounted(performance.now());
+    if (delay === null) ref.current?.style.setProperty("animation", "none");
+    else ref.current?.style.setProperty("--skeleton-delay", `${Math.round(delay)}ms`);
+    return () => skeletonUnmounted(performance.now());
+  }, []);
+
   return (
-    <div role="status" aria-live="polite" data-skeleton={kind} className={className}>
+    <div
+      ref={ref}
+      role="status"
+      aria-live="polite"
+      data-skeleton={kind}
+      className={cn("skeleton-reveal", className)}
+    >
       <span className="sr-only">{t("loading")}</span>
       {/* The shape is for sighted users only; it is not real content. */}
       <div aria-hidden inert className="contents">
