@@ -1,21 +1,15 @@
-"use client";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { HomeRedirect } from "@/features/shell/HomeRedirect";
+import { homePath, readSessionClaims } from "@/lib/session-claims";
 
-import { CustomerPageSkeleton, CustomersPageSkeleton } from "@/features/customers/components/PageSkeletons";
-import { useMe } from "@/features/auth/queries";
-
-/** Staff → customer list; a customer → their own record. Meanwhile, the skeleton of where it goes. */
-export default function Home() {
-  const router = useRouter();
-  const { data: me } = useMe();
-  const isCustomer = me?.role === "customer" && !!me.customer_id;
-
-  useEffect(() => {
-    if (!me) return;
-    router.replace(isCustomer ? `/customers/${me.customer_id}` : "/customers");
-  }, [isCustomer, me, router]);
-
-  return isCustomer ? <CustomerPageSkeleton id={me.customer_id!} /> : <CustomersPageSkeleton />;
+/**
+ * Staff → the customer list; a customer → their own record. Decided here from the session's role
+ * claims, so "/" (where sign-in lands) never renders: the shell first appears as the right page.
+ */
+export default async function Home() {
+  const claims = readSessionClaims((await cookies()).get("access_token")?.value);
+  if (claims) redirect(homePath(claims));
+  return <HomeRedirect />;
 }
