@@ -48,10 +48,11 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
   return (
     <table className="w-full border-collapse text-start text-sm">
       <caption className="sr-only">{t("tableCaption")}</caption>
-      {/* Pinned to the top of the shell's scroll area. With border-collapse the row's border stays
-          behind when the header sticks, so each cell draws its own bottom rule as an inset shadow. */}
-      <thead className="sticky top-0 z-10 bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]">
-        <tr className="border-y border-(--obsidian-dashboard-shell-border) text-xs text-(--obsidian-dashboard-shell-text-subtle)">
+      {/* Each header cell is pinned to the top of the shell's scroll area and draws its own top and
+          bottom rules as inset shadows. Collapsed borders belong to the table, not the row: they
+          scroll away with it and Chromium leaves a 1px hole above a stuck header where they were. */}
+      <thead className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_1px_0_var(--obsidian-dashboard-shell-border),inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]">
+        <tr className="text-xs text-(--obsidian-dashboard-shell-text-subtle)">
           <SortHeader label={t("columns.name")} sortKey="name" sort={sort} onSort={onSort} />
           <th scope="col" className={cn(cell, hideBelow.email, "font-normal")}>
             {t("columns.email")}
