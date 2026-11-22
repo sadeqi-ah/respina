@@ -529,11 +529,15 @@ export function DashboardShell({
   const isDark = useScopedDark(rootRef, className);
 
   // The content stays mounted across tabs, so it animates in place rather than remounting and losing its state.
+  // Only a switch between the tabs on screen animates: when the shell stays mounted across pages, a new
+  // page (another set of tabs, or none) brings its own tab value and must not play the tab animation.
+  const tabValues = tabs?.map((item) => item.value).join("\n") ?? "";
   useEffect(() => {
-    if (shownTab.current === activeTab) return;
+    const previous = shownTab.current;
+    if (previous === activeTab) return;
     shownTab.current = activeTab;
     const content = contentRef.current;
-    if (!content || reduceMotion) return;
+    if (!content || reduceMotion || !tabValues.split("\n").includes(previous)) return;
     const controls = animate(
       content,
       { opacity: [0, 1], y: [6, 0], filter: ["blur(4px)", "blur(0px)"] },
@@ -545,7 +549,7 @@ export function DashboardShell({
       content.style.removeProperty("filter");
     });
     return () => controls.stop();
-  }, [activeTab, reduceMotion]);
+  }, [activeTab, reduceMotion, tabValues]);
 
   const clampWidth = (width: number) => Math.round(Math.min(maxSidebarWidth, Math.max(minSidebarWidth, width)));
   const width = clampWidth(dragWidth ?? committedWidth);
@@ -634,6 +638,7 @@ export function DashboardShell({
   };
 
   const Heading = `h${headingLevel}` as "h1" | "h2" | "h3";
+  const hasTabs = !!tabs?.length;
 
   const openNavigationLabel = labels?.openNavigation ?? "Open navigation";
   const closeNavigationLabel = labels?.closeNavigation ?? "Close navigation";
@@ -734,27 +739,31 @@ export function DashboardShell({
           </aside>
 
           <section aria-labelledby={titleId} inert={isDrawerOpen} className="flex min-h-0 min-w-0 flex-1 flex-col">
-            {tabs?.length ? (
-              <TabsPrimitive.Root value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
-                {renderHeader(
+            {/* One tree with or without tabs: a page that adds or drops its tabs (the shell can stay mounted
+                across pages) must not remount the header or the content below it. */}
+            <TabsPrimitive.Root value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
+              {renderHeader(
+                hasTabs ? (
                   <TabsPrimitive.List aria-labelledby={titleId} className="border-b border-(--obsidian-dashboard-shell-border) px-3 pb-2.5">
                     <HoverHighlightList className="flex flex-wrap items-center gap-1" highlightClassName="rounded-md bg-(--obsidian-dashboard-shell-hover)">
-                      {tabs.map((item) => (
-                        <ShellTab key={item.value} item={item} isActive={item.value === activeTab} pillId={tabPillId} />
+                      {tabs?.map((item) => (
+                        <ShellTab key={item.value} item={item} isActive={item.value === activeTab} pillId={tabPillId} idPrefix={uid} />
                       ))}
                     </HoverHighlightList>
-                  </TabsPrimitive.List>,
-                )}
-                <TabsPrimitive.Content value={activeTab} className="flex min-h-0 flex-1 flex-col outline-none">
-                  {body}
-                </TabsPrimitive.Content>
-              </TabsPrimitive.Root>
-            ) : (
-              <>
-                {renderHeader()}
+                  </TabsPrimitive.List>
+                ) : undefined,
+              )}
+              {/* The active tab's panel. Not a TabsPrimitive.Content: that element would only exist with tabs. */}
+              <div
+                role={hasTabs ? "tabpanel" : undefined}
+                id={hasTabs ? tabPanelId(uid, activeTab) : undefined}
+                aria-labelledby={hasTabs ? tabTriggerId(uid, activeTab) : undefined}
+                tabIndex={hasTabs ? 0 : undefined}
+                className="flex min-h-0 flex-1 flex-col outline-none"
+              >
                 {body}
-              </>
-            )}
+              </div>
+            </TabsPrimitive.Root>
           </section>
 
           <AnimatePresence>
@@ -1054,15 +1063,21 @@ function NavItem({ item, isActive, isQuiet, pillId, onSelect }: NavItemProps) {
   );
 }
 
-type ShellTabProps = { item: DashboardShellTab; isActive: boolean; pillId: string };
+type ShellTabProps = { item: DashboardShellTab; isActive: boolean; pillId: string; idPrefix: string };
 
-function ShellTab({ item, isActive, pillId }: ShellTabProps) {
+const tabTriggerId = (prefix: string, value: string) => `${prefix}-tab-${value}`;
+const tabPanelId = (prefix: string, value: string) => `${prefix}-panel-${value}`;
+
+function ShellTab({ item, isActive, pillId, idPrefix }: ShellTabProps) {
   const highlight = useContext(HoverHighlightContext);
   const reduceMotion = useReducedMotion();
 
   return (
     <TabsPrimitive.Trigger
       value={item.value}
+      // The shell renders the panel itself, so the tab and the panel point at each other by these ids.
+      id={tabTriggerId(idPrefix, item.value)}
+      aria-controls={tabPanelId(idPrefix, item.value)}
       onPointerEnter={(event) => {
         if (event.pointerType !== "touch") highlight?.show(event.currentTarget);
       }}
