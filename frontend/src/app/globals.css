@@ -30,26 +30,6 @@
   }
 }
 
-/*
- * Yekan Bakh (fontiran.com, commercial). The file lives in public/fonts/yekanbakh/ and is
- * gitignored: it needs a web license and must never be committed (see README "Fonts").
- * Without it the fa stack falls back to Vazirmatn.
- *
- * One variable file covers every weight and width. Both axes are declared as @font-face ranges,
- * so the standard properties drive them: font-weight → wght (100–950), font-stretch → wdth
- * (62.5%–150%). Use font-* and font-stretch-* utilities, never font-variation-settings.
- */
-@font-face {
-  font-family: "Yekan Bakh";
-  src:
-    url("/fonts/yekanbakh/YekanBakh-VF.woff2") format("woff2-variations"),
-    url("/fonts/yekanbakh/YekanBakh-VF.woff2") format("woff2");
-  font-weight: 100 950;
-  font-stretch: 62.5% 150%;
-  font-style: normal;
-  font-display: swap;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -140,7 +120,7 @@
 }
 
 /*
- * The next/font variables (--font-geist, --font-vazirmatn) are set by classes on <body>, not
+ * The next/font variables (--font-geist, --font-estedad) are set by classes on <body>, not
  * <html>: next-themes owns <html>'s class. So the font stack is declared on <body>, where
  * those variables resolve, and everything (portals included) renders inside it.
  */
@@ -149,7 +129,7 @@ body {
 }
 
 body:lang(fa) {
-  --app-font-sans: "Yekan Bakh", var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+  --app-font-sans: var(--font-estedad), ui-sans-serif, system-ui, sans-serif;
 }
 
 .dark {

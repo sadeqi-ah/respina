@@ -167,7 +167,7 @@ values. Go needs no change: it returns whatever status the row holds.
    parity test (`src/messages/messages.test.ts`) fails until every key exists. Add the language's
    own name under `common.languages` in **every** message file.
 3. **Font**: in `frontend/src/app/layout.tsx`, choose a `next/font` that covers the script (for
-   Arabic, Vazirmatn already does), and map the locale to it.
+   Arabic, Estedad already does), and map the locale to it.
 4. **Locale switcher**: it lists `locales`, so the new language appears automatically.
 5. **Formats**: dates and numbers come from `useFormatter`, so they follow the locale. Check the
    calendar and digits are what users expect.

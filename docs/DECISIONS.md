@@ -194,13 +194,10 @@ direction comes from Radix `useDirection()` (one shared `@radix-ui/react-directi
 choose the side from the direction. Visual baselines: `frontend/e2e/__screenshots__/`.
 
 ### Persian font
-`fa` uses Yekan Bakh (fontiran.com, commercial) as one variable font with `wght` 100–950 and
-`wdth` 62.5–150. Both axes are declared as `@font-face` ranges, so `font-weight` /
-`font-stretch` (and Tailwind's `font-*` / `font-stretch-*`) drive them directly. The licence
-forbids redistributing the file and requires a web licence for server use, so it is gitignored
-and installed per machine; Vazirmatn (OFL, via `next/font`) is the fallback wherever it's missing.
-The Latin-digit variant is used: Persian digits come from `Intl` formatting, and Latin digits
-stay correct inside emails, phone numbers and IDs.
+`fa` uses Estedad (OFL, via `next/font/google`), one variable font with `wght` 100–900, so
+`font-weight` and Tailwind's `font-*` utilities drive it directly. It ships with the app and
+looks the same on every machine and in CI. Persian digits come from `Intl` formatting, and Latin
+digits stay correct inside emails, phone numbers and IDs.
 
 ---
 
