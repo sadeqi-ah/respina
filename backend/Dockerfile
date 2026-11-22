@@ -12,7 +12,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project
+    uv sync --frozen --no-install-project
 
 COPY . .
 

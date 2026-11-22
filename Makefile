@@ -11,8 +11,9 @@ HAS_BACKEND  := $(wildcard backend/pyproject.toml)
 HAS_FRONTEND := $(wildcard frontend/package.json)
 HAS_GO       := $(wildcard health-service/go.mod)
 HAS_PHP      := $(wildcard php-module/composer.json)
+JWT_KEY_MODE ?= $(if $(filter Linux,$(shell uname -s)),644,600)
 
-.PHONY: help env keys up down logs ps migrate seed test lint fmt psql smoke
+.PHONY: help env keys build up down logs ps migrate seed test lint fmt psql smoke
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -25,12 +26,24 @@ keys: ## Generate the RS256 JWT keypair into secrets/ (idempotent)
 	@mkdir -p $(SECRETS_DIR)
 	@if [ -f $(JWT_PRIVATE) ]; then echo "$(JWT_PRIVATE) already exists, keeping it"; \
 	else openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out $(JWT_PRIVATE) 2>/dev/null \
-		&& chmod 600 $(JWT_PRIVATE) && echo "generated $(JWT_PRIVATE)"; fi
+		&& echo "generated $(JWT_PRIVATE)"; fi
+	@# Compose mounts file secrets with their host owner and mode (uid/gid/mode are swarm-only).
+	@# The backend runs as uid 10001, so on Linux a 600 key owned by you is unreadable in the container;
+	@# Docker Desktop (macOS/Windows) hides this by relaxing permissions on bind mounts.
+	@# Choice: 600 where the runtime hides ownership (Docker Desktop), 644 on Linux so uid 10001 can
+	@# read the bind mount. 644 is acceptable ONLY for this local/CI dev key: secrets/ is gitignored
+	@# and the key signs tokens for demo data. A real deployment must not use bind-mounted key files:
+	@# use the orchestrator's secret store (swarm/k8s secrets set uid and mode per container).
+	@# Override with `make keys JWT_KEY_MODE=640`; re-running re-applies the mode, never the key.
+	@chmod $(JWT_KEY_MODE) $(JWT_PRIVATE)
 	@if [ -f $(JWT_PUBLIC) ]; then echo "$(JWT_PUBLIC) already exists, keeping it"; \
 	else openssl pkey -in $(JWT_PRIVATE) -pubout -out $(JWT_PUBLIC) && echo "generated $(JWT_PUBLIC)"; fi
 
-up: ## Start the stack in the background
-	$(COMPOSE) up -d
+build: ## Build all images
+	$(COMPOSE) build
+
+up: ## Start the stack and wait until every service is healthy
+	$(COMPOSE) up -d --build --wait --wait-timeout 180
 
 down: ## Stop the stack (keeps volumes)
 	$(COMPOSE) down
@@ -44,8 +57,8 @@ ps: ## Show service status
 migrate: ## Run Django migrations
 	$(COMPOSE) exec backend python manage.py migrate
 
-seed: ## Load seed data
-	$(COMPOSE) exec backend python manage.py seed
+seed: ## Load seed data (one-shot container; pass ARGS=--reset to start over)
+	$(COMPOSE) --profile seed run --rm seed $(ARGS)
 
 test: ## Run every component's test suite
 ifneq ($(HAS_BACKEND),)
