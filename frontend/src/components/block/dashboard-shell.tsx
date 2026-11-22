@@ -661,7 +661,8 @@ export function DashboardShell({
             {title}
           </Heading>
           {status && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-(--obsidian-dashboard-shell-border-strong) bg-(--obsidian-dashboard-shell-muted) py-[3px] ps-[3px] pe-[6px] text-xs leading-none">
+            // Hidden on phones, where it would squeeze the title down to its first letter.
+            <span className="hidden shrink-0 items-center gap-1 rounded-md border border-(--obsidian-dashboard-shell-border-strong) bg-(--obsidian-dashboard-shell-muted) py-[3px] ps-[3px] pe-[6px] text-xs leading-none @md/dashboard-shell:inline-flex">
               <span aria-hidden className={cn("relative flex size-3 items-center justify-center", statusToneClasses[statusTone])}>
                 <span className="absolute inset-0 rounded-full bg-current opacity-25" />
                 <span className="size-1.5 rounded-full bg-current" />

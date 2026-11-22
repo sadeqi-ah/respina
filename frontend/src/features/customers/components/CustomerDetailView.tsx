@@ -66,6 +66,13 @@ export function CustomerDetailView({ id }: { id: number }) {
       {ts("add.title")}
     </DashboardButton>
   ) : null;
+  // The header copy is icon-only on phones so the customer's name fits; the empty state keeps the label.
+  const headerAddAction = isStaff ? (
+    <DashboardButton variant="primary" size="sm" aria-label={ts("add.title")} onClick={() => setAdding(true)}>
+      <AddCircle aria-hidden />
+      <span className="hidden @md/dashboard-shell:inline">{ts("add.title")}</span>
+    </DashboardButton>
+  ) : null;
 
   let body;
   if (customer.isPending) body = <LoadingState />;
@@ -88,7 +95,7 @@ export function CustomerDetailView({ id }: { id: number }) {
       headerLeading={<BackToCustomersLink />}
       status={customer.data ? ts("count", { count: customer.data.services_count }) : undefined}
       statusTone="neutral"
-      headerActions={addAction}
+      headerActions={headerAddAction}
       tabs={TABS.map((tab) => ({ value: tab, label: t(`tabs.${tab}`) }))}
       tab={params.tab}
       onTabChange={(tab) => setParams({ tab: tab as Tab, status: null, type: null })}
