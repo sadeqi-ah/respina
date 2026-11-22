@@ -15,7 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Customer } from "@/types/api";
 
-import { sortStateOf, type Ordering, type SortKey } from "../params";
+import { customerHref, sortStateOf, type ListParams, type SortKey } from "../params";
 
 // Adapted from Obsidian's dashboard-shell-page table (registry: @obsidian/dashboard-shell-page). Columns hide as the table's own container
 // narrows, in this order: created → services → phone → email. The name is always shown.
@@ -29,12 +29,13 @@ const hideBelow = {
   created: "hidden @3xl/table:table-cell", // + created ~755px
 } as const;
 
-type Props = { customers: Customer[]; ordering: Ordering; onSort: (key: SortKey) => void };
+// The list's own URL state, carried into detail links so their back link returns to this view.
+type Props = { customers: Customer[]; params: ListParams; onSort: (key: SortKey) => void };
 
-export function CustomerTable({ customers, ordering, onSort }: Props) {
+export function CustomerTable({ customers, params, onSort }: Props) {
   const t = useTranslations("customers");
   const format = useFormatter();
-  const sort = sortStateOf(ordering);
+  const sort = sortStateOf(params.ordering);
 
   const copyEmail = async (customer: Customer) => {
     try {
@@ -48,8 +49,11 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
   return (
     <table className="w-full border-collapse text-start text-sm">
       <caption className="sr-only">{t("tableCaption")}</caption>
-      <thead>
-        <tr className="border-y border-(--obsidian-dashboard-shell-border) text-xs text-(--obsidian-dashboard-shell-text-subtle)">
+      {/* Each header cell is pinned to the top of the shell's scroll area and draws its own top and
+          bottom rules as inset shadows. Collapsed borders belong to the table, not the row: they
+          scroll away with it and Chromium leaves a 1px hole above a stuck header where they were. */}
+      <thead className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_1px_0_var(--obsidian-dashboard-shell-border),inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]">
+        <tr className="text-xs text-(--obsidian-dashboard-shell-text-subtle)">
           <SortHeader label={t("columns.name")} sortKey="name" sort={sort} onSort={onSort} />
           <th scope="col" className={cn(cell, hideBelow.email, "font-normal")}>
             {t("columns.email")}
@@ -72,7 +76,8 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
           </th>
         </tr>
       </thead>
-      <tbody>
+      {/* Anything scrolled into view (keyboard focus, find-in-page) stops below the pinned header. */}
+      <tbody className="[&_*]:scroll-mt-12">
         {customers.map((customer) => (
           <tr
             key={customer.id}
@@ -81,7 +86,7 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
             <td className={cell}>
               <div className="flex min-w-0 flex-col gap-0.5">
                 <Link
-                  href={`/customers/${customer.id}`}
+                  href={customerHref(customer.id, params)}
                   className="touch-target relative max-w-full font-medium outline-none hover:underline focus-visible:underline"
                 >
                   {/* Truncate inside: overflow-hidden on the link would clip its touch-target hit area. */}
@@ -144,7 +149,7 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
                 </DashboardMenuTrigger>
                 <DashboardMenuContent align="end" className="min-w-44">
                   <DashboardMenuItem asChild>
-                    <Link href={`/customers/${customer.id}`}>
+                    <Link href={customerHref(customer.id, params)}>
                       <Eye aria-hidden />
                       {t("view")}
                     </Link>

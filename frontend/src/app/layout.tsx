@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 
 import { QueryProvider } from "@/components/QueryProvider";
 import { DirectionProvider } from "@/components/ui/direction";
@@ -29,23 +30,31 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const font = locale === "fa" ? vazirmatn : geist;
 
   return (
-    <html lang={locale} dir={dir} className={`${font.variable} ${geistMono.variable} h-full antialiased`}>
+    // suppressHydrationWarning: next-themes sets the theme class on <html> before React hydrates.
+    <html
+      suppressHydrationWarning
+      lang={locale}
+      dir={dir}
+      className={`${font.variable} ${geistMono.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider>
-          <DirectionProvider dir={dir}>
-            <QueryProvider>
-              <TooltipProvider>
-                {children}
-                {/* The app has no dark mode yet: without theme="light" toasts follow the OS and turn dark. */}
-                <Toaster
-                  theme="light"
-                  position={dir === "rtl" ? "bottom-left" : "bottom-right"}
-                  containerAriaLabel={t("notifications")}
-                />
-              </TooltipProvider>
-            </QueryProvider>
-          </DirectionProvider>
-        </NextIntlClientProvider>
+        {/* The choice lives in localStorage and is applied by an inline script before first paint,
+            so there is no flash and nothing for the server to read (see ADR-011). */}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <NextIntlClientProvider>
+            <DirectionProvider dir={dir}>
+              <QueryProvider>
+                <TooltipProvider>
+                  {children}
+                  <Toaster
+                    position={dir === "rtl" ? "bottom-left" : "bottom-right"}
+                    containerAriaLabel={t("notifications")}
+                  />
+                </TooltipProvider>
+              </QueryProvider>
+            </DirectionProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

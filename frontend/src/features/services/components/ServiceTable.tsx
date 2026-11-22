@@ -23,8 +23,9 @@ const hideBelow = { sm: "hidden @sm/table:table-cell", lg: "hidden @lg/table:tab
 type Props = {
   services: Service[];
   canChangeStatus: boolean;
-  onChangeStatus: (service: Service) => void;
-  onShowHistory: (service: Service) => void;
+  // `opener` is the selected menu item, so the dialog can give focus back to its menu on close.
+  onChangeStatus: (service: Service, opener: Element) => void;
+  onShowHistory: (service: Service, opener: Element) => void;
 };
 
 export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShowHistory }: Props) {
@@ -34,8 +35,11 @@ export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShow
   return (
     <table className="w-full border-collapse text-start text-sm">
       <caption className="sr-only">{t("tableCaption")}</caption>
-      <thead>
-        <tr className="border-y border-(--obsidian-dashboard-shell-border) text-xs text-(--obsidian-dashboard-shell-text-subtle)">
+      {/* Each header cell is pinned to the top of the shell's scroll area and draws its own top and
+          bottom rules as inset shadows. Collapsed borders belong to the table, not the row: they
+          scroll away with it and Chromium leaves a 1px hole above a stuck header where they were. */}
+      <thead className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_1px_0_var(--obsidian-dashboard-shell-border),inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]">
+        <tr className="text-xs text-(--obsidian-dashboard-shell-text-subtle)">
           <th scope="col" className={cn(cell, "font-normal")}>
             {t("columns.name")}
           </th>
@@ -53,7 +57,8 @@ export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShow
           </th>
         </tr>
       </thead>
-      <tbody>
+      {/* Anything scrolled into view (keyboard focus, find-in-page) stops below the pinned header. */}
+      <tbody className="[&_*]:scroll-mt-12">
         {services.map((service) => (
           <tr
             key={service.id}
@@ -99,12 +104,12 @@ export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShow
                 </DashboardMenuTrigger>
                 <DashboardMenuContent align="end" className="min-w-44">
                   {canChangeStatus && (
-                    <DashboardMenuItem onSelect={() => onChangeStatus(service)}>
+                    <DashboardMenuItem onSelect={(event) => onChangeStatus(service, event.target as Element)}>
                       {service.status === "active" ? <Pause aria-hidden /> : <Play aria-hidden />}
                       {t(service.status === "active" ? "suspend" : "activate")}
                     </DashboardMenuItem>
                   )}
-                  <DashboardMenuItem onSelect={() => onShowHistory(service)}>
+                  <DashboardMenuItem onSelect={(event) => onShowHistory(service, event.target as Element)}>
                     <History aria-hidden />
                     {t("viewHistory")}
                   </DashboardMenuItem>

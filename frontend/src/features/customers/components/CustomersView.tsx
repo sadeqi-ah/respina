@@ -53,7 +53,7 @@ export function CustomersView() {
       <div aria-busy={query.isPlaceholderData} className={query.isPlaceholderData ? "opacity-60" : undefined}>
         <CustomerTable
           customers={query.data.results}
-          ordering={params.ordering}
+          params={params}
           onSort={(key) => setParams({ ordering: nextOrdering(params.ordering, key) })}
         />
         <Pagination

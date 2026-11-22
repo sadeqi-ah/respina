@@ -77,3 +77,40 @@ export function nextOrdering(current: Ordering, key: SortKey): Ordering {
   if (state.key !== key) return field[field.first];
   return state.direction === "asc" ? field.desc : field.asc;
 }
+
+/**
+ * The customer detail page remembers which list view it was opened from in ?from=, so its back
+ * link returns to the same search, page and ordering (ADR-009: that state lives in the URL).
+ */
+export const LIST_PATH = "/customers";
+export const RETURN_PARAM = "from";
+
+/** The detail page's URL, carrying the list's state when it differs from the default view. */
+export function customerHref(id: number, list: ListParams): string {
+  const query = toQueryString(list);
+  return query
+    ? `${LIST_PATH}/${id}?${RETURN_PARAM}=${encodeURIComponent(LIST_PATH + query)}`
+    : `${LIST_PATH}/${id}`;
+}
+
+// Resolves relative paths only; a value that names another origin keeps its own and is rejected.
+const SAME_ORIGIN = "http://same-origin.invalid";
+
+/**
+ * Where the back link goes. ?from= is user input and becomes an href, so it must not be an open
+ * redirect: only the customers list on this origin is accepted, and its query string is rebuilt
+ * from the parsed list params, so nothing but page, search and ordering survives.
+ * Anything else falls back to the plain list.
+ */
+export function listReturnPath(from: string | null): string {
+  // "//host" and "/\host" are protocol-relative in browsers; a scheme has no leading slash.
+  if (!from || !from.startsWith("/") || from.startsWith("//") || from.includes("\\")) return LIST_PATH;
+  let url: URL;
+  try {
+    url = new URL(from, SAME_ORIGIN);
+  } catch {
+    return LIST_PATH;
+  }
+  if (url.origin !== SAME_ORIGIN || url.pathname !== LIST_PATH) return LIST_PATH;
+  return LIST_PATH + toQueryString(parseListParams(url.searchParams));
+}

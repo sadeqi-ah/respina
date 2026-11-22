@@ -7,6 +7,7 @@
       "en": "English",
       "fa": "فارسی"
     },
+    "darkMode": "حالت تیره",
     "loading": "در حال بارگذاری…",
     "retry": "تلاش دوباره",
     "cancel": "انصراف",
@@ -47,6 +48,7 @@
   },
   "customers": {
     "title": "مشتریان",
+    "backToList": "بازگشت به مشتریان",
     "new": "مشتری جدید",
     "tableCaption": "مشتریان",
     "columns": {

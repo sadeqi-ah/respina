@@ -75,6 +75,8 @@
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-success-text: var(--success-text);
+  --color-warning-text: var(--warning-text);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -119,6 +121,9 @@
   --ring: #8b8b8b;
   --success: #16a34a;
   --warning: #d97706;
+  /* Status text on a 10% tint of its own colour: the base shades are under 3:1 there, these clear 4.5:1. */
+  --success-text: #166534;
+  --warning-text: #92400e;
   --sidebar: #ffffff;
   --sidebar-foreground: #161616;
   --sidebar-primary: #2563eb;
@@ -160,6 +165,8 @@
   --ring: #676767;
   --success: #22c55e;
   --warning: #fbbf24;
+  --success-text: var(--success);
+  --warning-text: var(--warning);
   --sidebar: #161616;
   --sidebar-foreground: #f9fbff;
   --sidebar-primary: #2563eb;
@@ -185,4 +192,15 @@
   html {
     @apply font-sans;
   }
+}
+
+/*
+ * Theme switch: ThemeToggle grows the new theme as a circle from the click point
+ * (::view-transition-new(root) animated from script). The default cross-fade is turned off so
+ * only the circle moves, and blending is off so the two snapshots don't mix colours.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }

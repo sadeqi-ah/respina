@@ -48,7 +48,8 @@
   --obsidian-dashboard-shell-border-strong: #393939;
   --obsidian-dashboard-shell-foreground: #f9fbff;
   --obsidian-dashboard-shell-text-muted: #9a9a9a;
-  --obsidian-dashboard-shell-text-subtle: #808080;
+  /* #808080 was 4.2:1 on controls (#1e1e1e) and menus; this clears 4.5:1 and stays below text-muted. */
+  --obsidian-dashboard-shell-text-subtle: #8c8c8c;
   --obsidian-dashboard-shell-icon: #f9fbff;
   --obsidian-dashboard-shell-hover: rgb(255 255 255 / 0.045);
   --obsidian-dashboard-shell-success: #22c55e;

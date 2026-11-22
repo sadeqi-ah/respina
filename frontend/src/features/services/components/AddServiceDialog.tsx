@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { DashboardButton } from "@/components/block/dashboard-shell";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -27,9 +27,14 @@ import { makeServiceSchema, type ServiceInput, type ServiceValues } from "../sch
 
 const FIELDS = ["name", "service_type"] as const;
 
-type Props = { customerId: number; open: boolean; onOpenChange: (open: boolean) => void };
+type Props = {
+  customerId: number;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCloseAutoFocus?: (event: Event) => void;
+};
 
-export function AddServiceDialog({ customerId, open, onOpenChange }: Props) {
+export function AddServiceDialog({ customerId, open, onOpenChange, onCloseAutoFocus }: Props) {
   const t = useTranslations("services");
   const tv = useTranslations("validation");
   const te = useTranslations("errors");
@@ -61,7 +66,7 @@ export function AddServiceDialog({ customerId, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} onCloseAutoFocus={onCloseAutoFocus}>
         <form onSubmit={onSubmit} noValidate aria-busy={isSubmitting} className="grid gap-4">
           <DialogHeader>
             <DialogTitle>{t("add.title")}</DialogTitle>
@@ -101,7 +106,9 @@ export function AddServiceDialog({ customerId, open, onOpenChange }: Props) {
                     >
                       <SelectValue placeholder={t("add.typePlaceholder")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    {/* Below the trigger and at least as wide, flipping up when there is no room; the
+                        default item-aligned mode covers the field and spills out of the dialog. */}
+                    <SelectContent position="popper" align="start">
                       {SERVICE_TYPES.map((type) => (
                         <SelectItem key={type} value={type}>
                           {t(`types.${type}`)}
@@ -115,12 +122,12 @@ export function AddServiceDialog({ customerId, open, onOpenChange }: Props) {
             </Field>
           </FieldGroup>
           <DialogFooter>
-            <DashboardButton variant="secondary" size="sm" onClick={() => setOpen(false)}>
+            <Button variant="outline" onClick={() => setOpen(false)}>
               {t("cancel")}
-            </DashboardButton>
-            <DashboardButton type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? t("add.submitting") : t("add.submit")}
-            </DashboardButton>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

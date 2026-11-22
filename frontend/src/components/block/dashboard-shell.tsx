@@ -407,6 +407,8 @@ export type DashboardShellProps = Omit<ComponentProps<"div">, "title" | "childre
   onActiveItemChange?: (id: string) => void;
   title: ReactNode;
   headingLevel?: 1 | 2 | 3;
+  /** Before the title, after the navigation button: a back link or breadcrumb. Kept outside the heading. */
+  headerLeading?: ReactNode;
   /** A short label in a pill beside the title, such as "Active". */
   status?: string;
   statusTone?: DashboardShellStatusTone;
@@ -482,6 +484,7 @@ export function DashboardShell({
   headingLevel = 1,
   status,
   statusTone = "success",
+  headerLeading,
   headerActions,
   tabs,
   tab,
@@ -653,11 +656,13 @@ export function DashboardShell({
           >
             <Menu aria-hidden />
           </DashboardButton>
+          {headerLeading}
           <Heading id={titleId} className="truncate text-base font-medium leading-none tracking-normal">
             {title}
           </Heading>
           {status && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-(--obsidian-dashboard-shell-border-strong) bg-(--obsidian-dashboard-shell-muted) py-[3px] ps-[3px] pe-[6px] text-xs leading-none">
+            // Hidden on phones, where it would squeeze the title down to its first letter.
+            <span className="hidden shrink-0 items-center gap-1 rounded-md border border-(--obsidian-dashboard-shell-border-strong) bg-(--obsidian-dashboard-shell-muted) py-[3px] ps-[3px] pe-[6px] text-xs leading-none @md/dashboard-shell:inline-flex">
               <span aria-hidden className={cn("relative flex size-3 items-center justify-center", statusToneClasses[statusTone])}>
                 <span className="absolute inset-0 rounded-full bg-current opacity-25" />
                 <span className="size-1.5 rounded-full bg-current" />

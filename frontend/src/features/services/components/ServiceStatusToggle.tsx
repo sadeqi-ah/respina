@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { DashboardButton } from "@/components/block/dashboard-shell";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,14 +19,18 @@ import type { Service } from "@/types/api";
 import { useChangeServiceStatus } from "../queries";
 import { REASON_MAX_LENGTH } from "../schemas";
 
-type Props = { service: Service | null; onOpenChange: (open: boolean) => void };
+type Props = {
+  service: Service | null;
+  onOpenChange: (open: boolean) => void;
+  onCloseAutoFocus?: (event: Event) => void;
+};
 
 /**
  * Confirm a suspend/activate with an optional reason. The dialog closes at once and the table
  * shows the new status immediately (optimistic); a failure rolls back and shows a toast.
  * Render it with `key={service?.id}` so every service starts with an empty reason.
  */
-export function ServiceStatusToggle({ service, onOpenChange }: Props) {
+export function ServiceStatusToggle({ service, onOpenChange, onCloseAutoFocus }: Props) {
   const t = useTranslations("services.statusChange");
   const ts = useTranslations("services");
   const change = useChangeServiceStatus();
@@ -45,7 +49,7 @@ export function ServiceStatusToggle({ service, onOpenChange }: Props) {
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} onCloseAutoFocus={onCloseAutoFocus}>
         <DialogHeader>
           <DialogTitle>{t(isSuspend ? "suspendTitle" : "activateTitle", { name: service.name })}</DialogTitle>
           <DialogDescription>{t(isSuspend ? "suspendDetail" : "activateDetail")}</DialogDescription>
@@ -62,12 +66,17 @@ export function ServiceStatusToggle({ service, onOpenChange }: Props) {
           <FieldDescription>{t("reasonHint", { max: REASON_MAX_LENGTH })}</FieldDescription>
         </Field>
         <DialogFooter>
-          <DashboardButton variant="secondary" size="sm" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             {ts("cancel")}
-          </DashboardButton>
-          <DashboardButton variant={isSuspend ? "danger" : "primary"} size="sm" onClick={confirm}>
+          </Button>
+          {/* The confirm action is filled in both cases; shadcn's destructive variant is only a tint. */}
+          <Button
+            variant={isSuspend ? "destructive" : "default"}
+            className={isSuspend ? "bg-destructive text-white hover:bg-destructive/85" : undefined}
+            onClick={confirm}
+          >
             {ts(isSuspend ? "suspend" : "activate")}
-          </DashboardButton>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

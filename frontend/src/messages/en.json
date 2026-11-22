@@ -7,6 +7,7 @@
       "en": "English",
       "fa": "فارسی"
     },
+    "darkMode": "Dark mode",
     "loading": "Loading…",
     "retry": "Try again",
     "cancel": "Cancel",
@@ -47,6 +48,7 @@
   },
   "customers": {
     "title": "Customers",
+    "backToList": "Back to customers",
     "new": "New customer",
     "tableCaption": "Customers",
     "columns": {
