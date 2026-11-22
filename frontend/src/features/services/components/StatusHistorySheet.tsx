@@ -13,10 +13,14 @@ import type { Service, StatusLog } from "@/types/api";
 import { useStatusHistory } from "../queries";
 import { ServiceStatusBadge } from "./ServiceStatusBadge";
 
-type Props = { service: Service | null; onOpenChange: (open: boolean) => void };
+type Props = {
+  service: Service | null;
+  onOpenChange: (open: boolean) => void;
+  onCloseAutoFocus?: (event: Event) => void;
+};
 
 /** The audit trail of one service, newest first: from → to, who, source, when, reason. */
-export function StatusHistorySheet({ service, onOpenChange }: Props) {
+export function StatusHistorySheet({ service, onOpenChange, onCloseAutoFocus }: Props) {
   const t = useTranslations("services.history");
   const tc = useTranslations("common");
   const dir = useDirection();
@@ -50,6 +54,7 @@ export function StatusHistorySheet({ service, onOpenChange }: Props) {
         side={dir === "rtl" ? "left" : "right"}
         className="w-full gap-0 sm:max-w-md"
         closeLabel={tc("close")}
+        onCloseAutoFocus={onCloseAutoFocus}
       >
         <SheetHeader className="border-b">
           <SheetTitle>{t("title")}</SheetTitle>

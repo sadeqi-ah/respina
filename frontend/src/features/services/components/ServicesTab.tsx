@@ -8,6 +8,7 @@ import { Pagination } from "@/components/Pagination";
 import { EmptyState } from "@/components/states/EmptyState";
 import { ErrorState } from "@/components/states/ErrorState";
 import { TableSkeleton } from "@/components/states/TableSkeleton";
+import { useReturnFocus } from "@/hooks/use-return-focus";
 import type { Service } from "@/types/api";
 
 import type { ServiceFilters } from "../params";
@@ -28,6 +29,8 @@ export function ServicesTab({ customerId, filters, onFiltersChange, isStaff, add
   const t = useTranslations("services");
   const query = useServices(customerId, filters);
   const [toggling, setToggling] = useState<Service | null>(null);
+  const toggleFocus = useReturnFocus();
+  const historyFocus = useReturnFocus();
   const [historyOf, setHistoryOf] = useState<Service | null>(null);
   const filtered = filters.status !== null || filters.type !== null;
 
@@ -58,8 +61,14 @@ export function ServicesTab({ customerId, filters, onFiltersChange, isStaff, add
         <ServiceTable
           services={query.data.results}
           canChangeStatus={isStaff}
-          onChangeStatus={setToggling}
-          onShowHistory={setHistoryOf}
+          onChangeStatus={(service, opener) => {
+            toggleFocus.remember(opener);
+            setToggling(service);
+          }}
+          onShowHistory={(service, opener) => {
+            historyFocus.remember(opener);
+            setHistoryOf(service);
+          }}
         />
         <Pagination
           page={query.data.page}
@@ -78,9 +87,14 @@ export function ServicesTab({ customerId, filters, onFiltersChange, isStaff, add
           key={toggling?.id}
           service={toggling}
           onOpenChange={(open) => !open && setToggling(null)}
+          onCloseAutoFocus={toggleFocus.onCloseAutoFocus}
         />
       )}
-      <StatusHistorySheet service={historyOf} onOpenChange={(open) => !open && setHistoryOf(null)} />
+      <StatusHistorySheet
+        service={historyOf}
+        onOpenChange={(open) => !open && setHistoryOf(null)}
+        onCloseAutoFocus={historyFocus.onCloseAutoFocus}
+      />
     </>
   );
 }

@@ -3,7 +3,7 @@
 import { AddCircle } from "@duo-icons/react";
 import { useTranslations } from "next-intl";
 import { notFound, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type MouseEvent } from "react";
 
 import { DashboardButton } from "@/components/block/dashboard-shell";
 import { ErrorState } from "@/components/states/ErrorState";
@@ -20,6 +20,7 @@ import {
   type Tab,
 } from "@/features/services/params";
 import { AppShell } from "@/features/shell/AppShell";
+import { useReturnFocus } from "@/hooks/use-return-focus";
 import { ApiError } from "@/lib/api-error";
 
 import { RETURN_PARAM } from "../params";
@@ -55,20 +56,25 @@ export function CustomerDetailView({ id }: { id: number }) {
   const customer = useCustomer(id);
   const [params, setParams] = useDetailParams();
   const [adding, setAdding] = useState(false);
+  const addFocus = useReturnFocus();
+  const openAdd = (event: MouseEvent<HTMLButtonElement>) => {
+    addFocus.remember(event.currentTarget);
+    setAdding(true);
+  };
   const isStaff = me?.role === "staff"; // UX only: the API enforces it
 
   // Invisible and missing customers are both 404 from the API (scoping never leaks with a 403).
   if (customer.error instanceof ApiError && customer.error.status === 404) notFound();
 
   const addAction = isStaff ? (
-    <DashboardButton variant="primary" size="sm" onClick={() => setAdding(true)}>
+    <DashboardButton variant="primary" size="sm" onClick={openAdd}>
       <AddCircle aria-hidden />
       {ts("add.title")}
     </DashboardButton>
   ) : null;
   // The header copy is icon-only on phones so the customer's name fits; the empty state keeps the label.
   const headerAddAction = isStaff ? (
-    <DashboardButton variant="primary" size="sm" aria-label={ts("add.title")} onClick={() => setAdding(true)}>
+    <DashboardButton variant="primary" size="sm" aria-label={ts("add.title")} onClick={openAdd}>
       <AddCircle aria-hidden />
       <span className="hidden @md/dashboard-shell:inline">{ts("add.title")}</span>
     </DashboardButton>
@@ -106,7 +112,14 @@ export function CustomerDetailView({ id }: { id: number }) {
       }
     >
       <div className="@container/table flex min-h-full flex-col">{body}</div>
-      {isStaff && <AddServiceDialog customerId={id} open={adding} onOpenChange={setAdding} />}
+      {isStaff && (
+        <AddServiceDialog
+          customerId={id}
+          open={adding}
+          onOpenChange={setAdding}
+          onCloseAutoFocus={addFocus.onCloseAutoFocus}
+        />
+      )}
     </AppShell>
   );
 }

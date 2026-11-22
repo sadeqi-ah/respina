@@ -27,9 +27,14 @@ import { makeServiceSchema, type ServiceInput, type ServiceValues } from "../sch
 
 const FIELDS = ["name", "service_type"] as const;
 
-type Props = { customerId: number; open: boolean; onOpenChange: (open: boolean) => void };
+type Props = {
+  customerId: number;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCloseAutoFocus?: (event: Event) => void;
+};
 
-export function AddServiceDialog({ customerId, open, onOpenChange }: Props) {
+export function AddServiceDialog({ customerId, open, onOpenChange, onCloseAutoFocus }: Props) {
   const t = useTranslations("services");
   const tv = useTranslations("validation");
   const te = useTranslations("errors");
@@ -61,7 +66,7 @@ export function AddServiceDialog({ customerId, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} onCloseAutoFocus={onCloseAutoFocus}>
         <form onSubmit={onSubmit} noValidate aria-busy={isSubmitting} className="grid gap-4">
           <DialogHeader>
             <DialogTitle>{t("add.title")}</DialogTitle>

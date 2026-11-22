@@ -23,8 +23,9 @@ const hideBelow = { sm: "hidden @sm/table:table-cell", lg: "hidden @lg/table:tab
 type Props = {
   services: Service[];
   canChangeStatus: boolean;
-  onChangeStatus: (service: Service) => void;
-  onShowHistory: (service: Service) => void;
+  // `opener` is the selected menu item, so the dialog can give focus back to its menu on close.
+  onChangeStatus: (service: Service, opener: Element) => void;
+  onShowHistory: (service: Service, opener: Element) => void;
 };
 
 export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShowHistory }: Props) {
@@ -103,12 +104,12 @@ export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShow
                 </DashboardMenuTrigger>
                 <DashboardMenuContent align="end" className="min-w-44">
                   {canChangeStatus && (
-                    <DashboardMenuItem onSelect={() => onChangeStatus(service)}>
+                    <DashboardMenuItem onSelect={(event) => onChangeStatus(service, event.target as Element)}>
                       {service.status === "active" ? <Pause aria-hidden /> : <Play aria-hidden />}
                       {t(service.status === "active" ? "suspend" : "activate")}
                     </DashboardMenuItem>
                   )}
-                  <DashboardMenuItem onSelect={() => onShowHistory(service)}>
+                  <DashboardMenuItem onSelect={(event) => onShowHistory(service, event.target as Element)}>
                     <History aria-hidden />
                     {t("viewHistory")}
                   </DashboardMenuItem>
