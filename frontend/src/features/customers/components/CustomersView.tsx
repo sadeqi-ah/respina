@@ -8,13 +8,12 @@ import { DashboardButton, dashboardButtonVariants } from "@/components/block/das
 import { Pagination } from "@/components/Pagination";
 import { EmptyState } from "@/components/states/EmptyState";
 import { ErrorState } from "@/components/states/ErrorState";
-import { TableSkeleton } from "@/components/states/TableSkeleton";
 import { useMe } from "@/features/auth/queries";
 import { useShellConfig } from "@/features/shell/shell-config";
 
 import { nextOrdering } from "../params";
 import { useCustomers, useListParams } from "../queries";
-import { CustomerTable } from "./CustomerTable";
+import { CustomerTable, CustomerTableSkeleton } from "./CustomerTable";
 import { CustomerSearch } from "./CustomerToolbar";
 
 export function CustomersView() {
@@ -32,7 +31,7 @@ export function CustomersView() {
   ) : null;
 
   let body;
-  if (query.isPending) body = <TableSkeleton />;
+  if (query.isPending) body = <CustomerTableSkeleton params={params} />;
   else if (query.isError) body = <ErrorState error={query.error} onRetry={() => query.refetch()} />;
   else if (query.data.count === 0 && params.search)
     body = (

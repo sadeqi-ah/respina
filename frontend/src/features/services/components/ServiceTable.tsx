@@ -10,9 +10,11 @@ import {
   DashboardMenuItem,
   DashboardMenuTrigger,
 } from "@/components/block/dashboard-shell";
+import { PendingSkeleton, SkeletonLine } from "@/components/states/PendingSkeleton";
 import { cn } from "@/lib/utils";
 import type { Service } from "@/types/api";
 
+import { SERVICES_PAGE_SIZE } from "../params";
 import { ServiceStatusBadge } from "./ServiceStatusBadge";
 
 // Same Obsidian table as the customers list. Columns hide as the container narrows:
@@ -35,28 +37,7 @@ export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShow
   return (
     <table className="w-full border-collapse text-start text-sm">
       <caption className="sr-only">{t("tableCaption")}</caption>
-      {/* Each header cell is pinned to the top of the shell's scroll area and draws its own top and
-          bottom rules as inset shadows. Collapsed borders belong to the table, not the row: they
-          scroll away with it and Chromium leaves a 1px hole above a stuck header where they were. */}
-      <thead className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_1px_0_var(--obsidian-dashboard-shell-border),inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]">
-        <tr className="text-xs text-(--obsidian-dashboard-shell-text-subtle)">
-          <th scope="col" className={cn(cell, "font-normal")}>
-            {t("columns.name")}
-          </th>
-          <th scope="col" className={cn(cell, hideBelow.sm, "font-normal")}>
-            {t("columns.type")}
-          </th>
-          <th scope="col" className={cn(cell, "font-normal")}>
-            {t("columns.status")}
-          </th>
-          <th scope="col" className={cn(cell, hideBelow.lg, "font-normal")}>
-            {t("columns.created")}
-          </th>
-          <th scope="col" className="w-10 py-2.5 ps-0 pe-3 @lg/table:pe-4">
-            <span className="sr-only">{t("columns.actions")}</span>
-          </th>
-        </tr>
-      </thead>
+      <ServiceTableHead />
       {/* Anything scrolled into view (keyboard focus, find-in-page) stops below the pinned header. */}
       <tbody className="[&_*]:scroll-mt-12">
         {services.map((service) => (
@@ -120,5 +101,82 @@ export function ServiceTable({ services, canChangeStatus, onChangeStatus, onShow
         ))}
       </tbody>
     </table>
+  );
+}
+
+const headClassName =
+  "[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_1px_0_var(--obsidian-dashboard-shell-border),inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]";
+
+// Each header cell is pinned to the top of the shell's scroll area and draws its own top and
+// bottom rules as inset shadows. Collapsed borders belong to the table, not the row: they
+// scroll away with it and Chromium leaves a 1px hole above a stuck header where they were.
+function ServiceTableHead() {
+  const t = useTranslations("services");
+  return (
+    <thead className={headClassName}>
+      <tr className="text-xs text-(--obsidian-dashboard-shell-text-subtle)">
+        <th scope="col" className={cn(cell, "font-normal")}>
+          {t("columns.name")}
+        </th>
+        <th scope="col" className={cn(cell, hideBelow.sm, "font-normal")}>
+          {t("columns.type")}
+        </th>
+        <th scope="col" className={cn(cell, "font-normal")}>
+          {t("columns.status")}
+        </th>
+        <th scope="col" className={cn(cell, hideBelow.lg, "font-normal")}>
+          {t("columns.created")}
+        </th>
+        <th scope="col" className="w-10 py-2.5 ps-0 pe-3 @lg/table:pe-4">
+          <span className="sr-only">{t("columns.actions")}</span>
+        </th>
+      </tr>
+    </thead>
+  );
+}
+
+/**
+ * The services while they load: the real header and placeholder rows built from the same cells,
+ * so each row has the height of a real one and nothing moves when the services arrive.
+ */
+/** As many placeholder rows as the first page will have, when the customer's service count is known. */
+export function serviceSkeletonRows(servicesCount: number | undefined): number {
+  return servicesCount === undefined ? 5 : Math.min(servicesCount, SERVICES_PAGE_SIZE);
+}
+
+export function ServiceTableSkeleton({ rows }: { rows: number }) {
+  return (
+    <PendingSkeleton kind="service-table">
+      <table className="w-full border-collapse text-start text-sm">
+        <ServiceTableHead />
+        <tbody>
+          {Array.from({ length: rows }, (_, i) => (
+            <tr key={i} className="border-b border-(--obsidian-dashboard-shell-border) last:border-b-0">
+              <td className={cell}>
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <SkeletonLine className={i % 2 ? "w-24" : "w-32"} />
+                  <SkeletonLine lineClassName="text-xs @sm/table:hidden" className="h-2.5 w-20" />
+                </div>
+              </td>
+              <td className={cn(cell, hideBelow.sm)}>
+                <SkeletonLine className="w-24" />
+              </td>
+              <td className={cell}>
+                <SkeletonLine className="w-16" />
+              </td>
+              <td className={cn(cell, hideBelow.lg)}>
+                <SkeletonLine className="w-20" />
+              </td>
+              <td className="w-10 py-2.5 ps-0 pe-3 @lg/table:pe-4">
+                {/* The actions button sets a row's height (with the font's line, in every script): keep an invisible one. */}
+                <DashboardButton variant="ghost" size="icon" tabIndex={-1} className="invisible size-7">
+                  <Ellipsis aria-hidden />
+                </DashboardButton>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </PendingSkeleton>
   );
 }

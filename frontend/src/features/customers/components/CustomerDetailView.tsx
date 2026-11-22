@@ -7,7 +7,6 @@ import { useCallback, useMemo, useState, type MouseEvent } from "react";
 
 import { DashboardButton } from "@/components/block/dashboard-shell";
 import { ErrorState } from "@/components/states/ErrorState";
-import { LoadingState } from "@/components/states/LoadingState";
 import { useMe } from "@/features/auth/queries";
 import { AddServiceDialog } from "@/features/services/components/AddServiceDialog";
 import { ServiceFilterMenus } from "@/features/services/components/ServiceFilterMenus";
@@ -26,7 +25,7 @@ import { ApiError } from "@/lib/api-error";
 import { RETURN_PARAM } from "../params";
 import { useCustomer } from "../queries";
 import { BackToCustomersLink } from "./BackToCustomersLink";
-import { CustomerDetails } from "./CustomerDetails";
+import { CustomerDetails, CustomerDetailsSkeleton } from "./CustomerDetails";
 
 function useDetailParams() {
   const searchParams = useSearchParams();
@@ -81,13 +80,16 @@ export function CustomerDetailView({ id }: { id: number }) {
   ) : null;
 
   let body;
-  if (customer.isPending) body = <LoadingState />;
-  else if (customer.isError) body = <ErrorState error={customer.error} onRetry={() => customer.refetch()} />;
-  else if (params.tab === "details") body = <CustomerDetails customer={customer.data} />;
+  if (customer.isError) body = <ErrorState error={customer.error} onRetry={() => customer.refetch()} />;
+  else if (params.tab === "details")
+    body = customer.isPending ? <CustomerDetailsSkeleton /> : <CustomerDetails customer={customer.data} />;
   else
+    // The services load alongside the customer rather than after it.
     body = (
       <ServicesTab
         customerId={id}
+        servicesCount={customer.data?.services_count}
+        customerPending={customer.isPending}
         filters={params}
         onFiltersChange={setParams}
         isStaff={isStaff}
