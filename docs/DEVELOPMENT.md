@@ -64,6 +64,12 @@ docker compose logs --no-log-prefix backend frontend php health | grep 8f2c1e
 **Logs.** `make logs`, or per service: `docker compose logs -f backend`. Django and gunicorn log
 to stdout; Go uses structured `slog` lines; PHP writes to stderr.
 
+Django and Go each write one `"request"` line per request with its timing. A Django one:
+
+```json
+{"level": "INFO", "logger": "apps.core.request", "message": "request", "request_id": "demo-42", "method": "GET", "path": "/nope", "status": 404, "duration_ms": 2}
+```
+
 **Database.**
 
 ```bash

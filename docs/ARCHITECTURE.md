@@ -179,15 +179,13 @@ need an explicit bypass policy. That's why it isn't there yet.
 My first steps:
 
 1. **Get the `request_id`** from response header `X-Request-ID` or error envelope.
-2. **Trace it through the logs** of the BFF, Django, PHP or Go to identify which component the time was spent in. All components log the same id.
+2. **Trace it through the logs** of the BFF, Django, PHP or Go. Django and Go write one `"request"` line per request with `duration_ms`, so the slow component usually shows directly. All components log the same id.
 3. **Django? Count the queries.** N+1 is probably the culprit. The `CaptureQueriesContext` tests protect the list endpoints, but only the paths they cover.
 4. **`EXPLAIN (ANALYZE, BUFFERS)` the slow query.** Look for a sequential scan where you expected an index, or a large gap between estimated and actual rows. Compare to the indexes in [ERD.md](ERD.md).
 5. **Check `pg_stat_statements`** to see if it's one slow request or a query that is slow all the time.
 
 What’s missing today:
 
-- Django's logs contain the `request_id` but **not the request duration** (only the Go service logs `duration_ms`), so step 2 shows where a request went, not how long each part took.
+- Only Django and Go log a per-request `duration_ms`. The BFF logs no timings and PHP logs only errors, so a slow hop through either is found by comparing timestamps.
 - **No tracing** (e.g. OpenTelemetry) so one request's time can't be split across BFF -> Django -> Postgres without reading timestamps by hand.
 - **No metrics endpoint** (e.g. Prometheus `/metrics`), so you don't get p95 latency per endpoint, no alert before a user reports the problem.
-
-The cheapest fix and the first that would be added is to add a duration to the Django request log.
