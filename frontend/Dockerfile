@@ -18,7 +18,8 @@ RUN --mount=type=cache,target=/root/.npm \
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+# public/ has no tracked files, so a fresh clone has no such directory; the runner copies it.
+RUN mkdir -p public && npm run build
 
 # --- runner: Node + the traced server, nothing else ---
 FROM node:22-alpine AS runner
