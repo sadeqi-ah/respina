@@ -80,7 +80,7 @@ ifneq ($(HAS_BACKEND),)
 	cd backend && uv run ruff check . && uv run ruff format --check .
 endif
 ifneq ($(HAS_FRONTEND),)
-	cd frontend && npm run lint && npm run lint:rtl && npx tsc --noEmit
+	cd frontend && npm run lint && npm run lint:rtl && npm run typecheck
 endif
 ifneq ($(HAS_GO),)
 	cd health-service && test -z "$$(gofmt -l .)" && go vet ./...
