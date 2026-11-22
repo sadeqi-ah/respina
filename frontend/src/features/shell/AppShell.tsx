@@ -23,6 +23,7 @@ import {
 } from "@/components/block/dashboard-shell";
 import { useMe } from "@/features/auth/queries";
 import { setLocale } from "@/i18n/actions";
+import { ThemeMenuGroup } from "@/features/theme/ThemeMenuGroup";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { locales } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -129,6 +130,8 @@ function UserMenu({ email }: { email?: string }) {
             </DashboardMenuRadioItem>
           ))}
         </DashboardMenuRadioGroup>
+        <DashboardMenuSeparator />
+        <ThemeMenuGroup />
         <DashboardMenuSeparator />
         <DashboardMenuItem onSelect={signOut}>
           <LogOut aria-hidden className="rtl:-scale-x-100" />
