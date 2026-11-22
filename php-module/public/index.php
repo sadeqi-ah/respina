@@ -11,6 +11,7 @@ use Respina\Controller\PageController;
 use Respina\Database;
 use Respina\Http\HttpException;
 use Respina\Http\Request;
+use Respina\Http\RequestLog;
 use Respina\Http\Response;
 use Respina\Http\Router;
 use Respina\Repository\CustomerRepository;
@@ -24,6 +25,7 @@ ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 ini_set('error_log', 'php://stderr');
 
+$start = hrtime(true);
 $request = Request::fromGlobals();
 
 try {
@@ -104,3 +106,5 @@ try {
 }
 
 $response->send($request->requestId);
+// One "request" line per request, error responses included (every branch above sets $response).
+RequestLog::write(RequestLog::line($request, $response->status, $start, hrtime(true)));
