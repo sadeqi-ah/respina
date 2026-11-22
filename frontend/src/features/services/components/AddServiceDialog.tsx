@@ -101,7 +101,9 @@ export function AddServiceDialog({ customerId, open, onOpenChange }: Props) {
                     >
                       <SelectValue placeholder={t("add.typePlaceholder")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    {/* Below the trigger and at least as wide, flipping up when there is no room; the
+                        default item-aligned mode covers the field and spills out of the dialog. */}
+                    <SelectContent position="popper" align="start">
                       {SERVICE_TYPES.map((type) => (
                         <SelectItem key={type} value={type}>
                           {t(`types.${type}`)}
