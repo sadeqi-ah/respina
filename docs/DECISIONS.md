@@ -292,7 +292,7 @@ rejected as blacklisted, and the user is signed out.
 - `token_blacklist_outstandingtoken` grows with every issued token; `manage.py flushexpiredtokens`
   prunes it (to be scheduled with the stack in Phase 5).
 
-## ADR-013: Bounded row-lock wait for status changes (`SET LOCAL lock_timeout`, 409 `service_busy`)
+## ADR-014: Bounded row-lock wait for status changes (`SET LOCAL lock_timeout`, 409 `service_busy`)
 
 - **Status:** Accepted
 - **Date:** 2026-11-22

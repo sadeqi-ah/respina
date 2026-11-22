@@ -11,7 +11,7 @@ use RuntimeException;
  */
 final class Config
 {
-    /** Postgres interval for the row-lock wait in status changes (ADR-013). */
+    /** Postgres interval for the row-lock wait in status changes (ADR-014). */
     public const DEFAULT_LOCK_TIMEOUT = '3s';
 
     public function __construct(
