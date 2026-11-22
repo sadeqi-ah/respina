@@ -1,0 +1,211 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main, "phase/*"]
+  pull_request:
+    branches: [dev]
+
+jobs:
+  # Path-filtering shared across downstream jobs.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      go: ${{ steps.filter.outputs.go }}
+      php: ${{ steps.filter.outputs.php }}
+      any: ${{ steps.filter.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            # Each job also runs when this workflow changes, so edits to a job are tested by it.
+            backend:
+              - 'backend/**'
+              - 'docker/postgres/**'
+              - '.github/workflows/ci.yml'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/ci.yml'
+            go:
+              - 'health-service/**'
+              - '.github/workflows/ci.yml'
+            php:
+              - 'php-module/**'
+              - 'backend/apps/*/migrations/**' # the php job's integration tests run on Django's schema and grants
+              - '.github/workflows/ci.yml'
+            any:
+              - 'backend/**'
+              - 'frontend/**'
+              - 'health-service/**'
+              - 'php-module/**'
+              - '.github/**'
+              - '.gitleaks.toml'
+
+  # ---------------------------------------------------------------------------
+  gitleaks:
+    needs: changes
+    if: needs.changes.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # gitleaks scans the pushed commit range, which a shallow clone doesn't have
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # needed to scan pull requests
+
+  # ---------------------------------------------------------------------------
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: cloudpanel
+          POSTGRES_USER: cloudpanel_owner
+          POSTGRES_PASSWORD: ci-test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s --health-timeout 3s --health-retries 10
+        ports:
+          - 5432:5432
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked # fails if uv.lock is out of date with pyproject.toml
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - name: Generate JWT keys
+        run: |
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/jwt_private.pem
+          openssl pkey -in /tmp/jwt_private.pem -pubout -out /tmp/jwt_public.pem
+      - name: Run migrations
+        run: uv run python manage.py migrate
+        env: &backend-env
+          DATABASE_URL: postgres://cloudpanel_owner:ci-test@localhost:5432/cloudpanel
+          DJANGO_SECRET_KEY: ci
+          JWT_PRIVATE_KEY_PATH: /tmp/jwt_private.pem
+          JWT_PUBLIC_KEY_PATH: /tmp/jwt_public.pem
+      - name: Check for missing migrations
+        run: uv run python manage.py makemigrations --check
+        env: *backend-env
+      - name: Run tests
+        run: uv run pytest
+        env: *backend-env
+
+  # ---------------------------------------------------------------------------
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run lint:rtl
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  # ---------------------------------------------------------------------------
+  go:
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: health-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: health-service/go.mod # one source of truth for the Go version
+          cache-dependency-path: health-service/go.sum
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go test -race ./...
+
+  # ---------------------------------------------------------------------------
+  php:
+    needs: changes
+    if: needs.changes.outputs.php == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: cloudpanel
+          POSTGRES_USER: cloudpanel_owner
+          POSTGRES_PASSWORD: ci-test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s --health-timeout 3s --health-retries 10
+        ports:
+          - 5432:5432
+    defaults:
+      run:
+        working-directory: php-module
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Generate JWT keys
+        run: |
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/jwt_private.pem
+          openssl pkey -in /tmp/jwt_private.pem -pubout -out /tmp/jwt_public.pem
+      - name: Create php_module DB role
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends postgresql-client
+          PGPASSWORD=ci-test psql -h localhost -U cloudpanel_owner -d cloudpanel <<'SQL'
+          CREATE ROLE php_module WITH LOGIN PASSWORD 'ci-test-php'
+            NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+          GRANT CONNECT ON DATABASE cloudpanel TO php_module;
+          SQL
+      - name: Run Django migrations (tables + php_module grants)
+        working-directory: backend
+        run: |
+          uv sync --locked
+          uv run python manage.py migrate
+        env:
+          DATABASE_URL: postgres://cloudpanel_owner:ci-test@localhost:5432/cloudpanel
+          DJANGO_SECRET_KEY: ci
+          JWT_PRIVATE_KEY_PATH: /tmp/jwt_private.pem
+          JWT_PUBLIC_KEY_PATH: /tmp/jwt_public.pem
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo_pgsql
+          tools: composer:v2
+      - run: composer install
+      - run: vendor/bin/phpstan analyse
+      - name: Run tests (integration skips if PHP_TEST_DB_DSN is unset)
+        run: vendor/bin/phpunit
+        env:
+          PHP_TEST_DB_DSN: pgsql:host=localhost;port=5432;dbname=cloudpanel
+          PHP_TEST_OWNER_USER: cloudpanel_owner
+          PHP_TEST_OWNER_PASSWORD: ci-test
+          PHP_TEST_DB_USER: php_module
+          PHP_TEST_DB_PASSWORD: ci-test-php
+      - name: SQL injection guard
+        run: bin/sql-guard.sh
