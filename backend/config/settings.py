@@ -4,10 +4,12 @@ For local development outside Docker, values may also come from `backend/.env`
 (see `backend/.env.example`). Real environment variables always win.
 """
 
+import re
 from datetime import timedelta
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -74,6 +76,11 @@ TEMPLATES = [
 DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+# Upper bound on waiting for a row lock in status changes, applied per transaction with
+# set_config(..., is_local => true) = SET LOCAL (ADR-013). Postgres interval syntax: 3s, 500ms.
+DB_LOCK_TIMEOUT = env("DB_LOCK_TIMEOUT", default="3s")
+if not re.fullmatch(r"[1-9][0-9]*(ms|s|min)?", DB_LOCK_TIMEOUT):
+    raise ImproperlyConfigured("DB_LOCK_TIMEOUT must look like 3s, 500ms or 1min.")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Auth ---------------------------------------------------------------------------------
