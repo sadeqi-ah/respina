@@ -716,6 +716,7 @@ dependencies = [
     { name = "djangorestframework-simplejwt", extra = ["crypto"] },
     { name = "drf-spectacular" },
     { name = "drf-spectacular-sidecar" },
+    { name = "faker" },
     { name = "gunicorn" },
     { name = "phonenumbers" },
     { name = "psycopg", extra = ["binary"] },
@@ -725,7 +726,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "factory-boy" },
-    { name = "faker" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-django" },
@@ -741,6 +741,7 @@ requires-dist = [
     { name = "djangorestframework-simplejwt", extras = ["crypto"], specifier = ">=5.5.1" },
     { name = "drf-spectacular", specifier = ">=0.30.0" },
     { name = "drf-spectacular-sidecar", specifier = ">=2026.10.1" },
+    { name = "faker", specifier = ">=40.63.0" },
     { name = "gunicorn", specifier = ">=27.0.1" },
     { name = "phonenumbers", specifier = ">=9.0.44" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.9" },
@@ -750,7 +751,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "factory-boy", specifier = ">=3.3.3" },
-    { name = "faker", specifier = ">=40.63.0" },
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
     { name = "pytest-django", specifier = ">=4.14.0" },
