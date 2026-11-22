@@ -199,6 +199,7 @@
     "not_found": "We couldn't find that.",
     "method_not_allowed": "That action isn't available.",
     "conflict": "This conflicts with existing data.",
+    "service_busy": "This service is being changed right now. Please try again.",
     "invalid_status_transition": "The service is already in that status.",
     "throttled": "Too many attempts. Please wait a minute and try again.",
     "dependency_unavailable": "The service is temporarily unavailable. Please try again shortly.",
