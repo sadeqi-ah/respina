@@ -48,7 +48,7 @@ make env keys up seed
 
 | Step | What it does |
 |---|---|
-| `make env` | Copies `.env.example` to `.env` (never overwrites an existing one). **Change the `change-me-*` values** for anything beyond local use. |
+| `make env` | Copies `.env.example` to `.env`, and `backend/.env.example` to `backend/.env` for running backend tests on the host (never overwrites). **Change the `change-me-*` values** for anything beyond local use. |
 | `make keys` | Generates the RS256 keypair into `secrets/` (gitignored; existing keys are kept). |
 | `make up` | Builds the images and starts all five services, returning once every one is healthy. |
 | `make seed` | Loads demo data: 30 customers with services and some status history. Safe to run again. |
@@ -69,8 +69,9 @@ Desktop and run these from **Git Bash** (it ships with Git for Windows and inclu
 in the repository root:
 
 ```bash
-# make env: create .env (skip if you already have one)
+# make env: create .env and backend/.env (skip any you already have)
 [ -f .env ] || cp .env.example .env
+[ -f backend/.env ] || cp backend/.env.example backend/.env
 
 # make keys: RS256 keypair for JWT (skip if secrets/ already has both files)
 mkdir -p secrets
@@ -103,7 +104,7 @@ PostgreSQL is published on `127.0.0.1:5432` only, for local tools and tests (`ma
 ## Tests
 
 ```bash
-make test    # every component's unit and integration suite
+make test    # every component's unit and integration suite (needs the toolchains below; installs npm/composer deps if missing)
 make lint    # ruff, ESLint + lint:rtl + tsc, gofmt + go vet, phpstan
 make smoke   # cross-service check against the running stack (needs `make up seed`)
 ```
