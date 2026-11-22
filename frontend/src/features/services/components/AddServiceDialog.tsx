@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { DashboardButton } from "@/components/block/dashboard-shell";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -115,12 +115,12 @@ export function AddServiceDialog({ customerId, open, onOpenChange }: Props) {
             </Field>
           </FieldGroup>
           <DialogFooter>
-            <DashboardButton variant="secondary" size="sm" onClick={() => setOpen(false)}>
+            <Button variant="outline" onClick={() => setOpen(false)}>
               {t("cancel")}
-            </DashboardButton>
-            <DashboardButton type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? t("add.submitting") : t("add.submit")}
-            </DashboardButton>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
