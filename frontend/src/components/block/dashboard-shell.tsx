@@ -407,6 +407,8 @@ export type DashboardShellProps = Omit<ComponentProps<"div">, "title" | "childre
   onActiveItemChange?: (id: string) => void;
   title: ReactNode;
   headingLevel?: 1 | 2 | 3;
+  /** Before the title, after the navigation button: a back link or breadcrumb. Kept outside the heading. */
+  headerLeading?: ReactNode;
   /** A short label in a pill beside the title, such as "Active". */
   status?: string;
   statusTone?: DashboardShellStatusTone;
@@ -482,6 +484,7 @@ export function DashboardShell({
   headingLevel = 1,
   status,
   statusTone = "success",
+  headerLeading,
   headerActions,
   tabs,
   tab,
@@ -653,6 +656,7 @@ export function DashboardShell({
           >
             <Menu aria-hidden />
           </DashboardButton>
+          {headerLeading}
           <Heading id={titleId} className="truncate text-base font-medium leading-none tracking-normal">
             {title}
           </Heading>

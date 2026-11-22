@@ -15,7 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Customer } from "@/types/api";
 
-import { sortStateOf, type Ordering, type SortKey } from "../params";
+import { customerHref, sortStateOf, type ListParams, type SortKey } from "../params";
 
 // Adapted from Obsidian's dashboard-shell-page table (registry: @obsidian/dashboard-shell-page). Columns hide as the table's own container
 // narrows, in this order: created → services → phone → email. The name is always shown.
@@ -29,12 +29,13 @@ const hideBelow = {
   created: "hidden @3xl/table:table-cell", // + created ~755px
 } as const;
 
-type Props = { customers: Customer[]; ordering: Ordering; onSort: (key: SortKey) => void };
+// The list's own URL state, carried into detail links so their back link returns to this view.
+type Props = { customers: Customer[]; params: ListParams; onSort: (key: SortKey) => void };
 
-export function CustomerTable({ customers, ordering, onSort }: Props) {
+export function CustomerTable({ customers, params, onSort }: Props) {
   const t = useTranslations("customers");
   const format = useFormatter();
-  const sort = sortStateOf(ordering);
+  const sort = sortStateOf(params.ordering);
 
   const copyEmail = async (customer: Customer) => {
     try {
@@ -85,7 +86,7 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
             <td className={cell}>
               <div className="flex min-w-0 flex-col gap-0.5">
                 <Link
-                  href={`/customers/${customer.id}`}
+                  href={customerHref(customer.id, params)}
                   className="touch-target relative max-w-full font-medium outline-none hover:underline focus-visible:underline"
                 >
                   {/* Truncate inside: overflow-hidden on the link would clip its touch-target hit area. */}
@@ -148,7 +149,7 @@ export function CustomerTable({ customers, ordering, onSort }: Props) {
                 </DashboardMenuTrigger>
                 <DashboardMenuContent align="end" className="min-w-44">
                   <DashboardMenuItem asChild>
-                    <Link href={`/customers/${customer.id}`}>
+                    <Link href={customerHref(customer.id, params)}>
                       <Eye aria-hidden />
                       {t("view")}
                     </Link>

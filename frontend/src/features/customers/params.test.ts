@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_PARAMS, MAX_SEARCH_LENGTH, nextOrdering, parseListParams, toQueryString } from "./params";
+import {
+  customerHref,
+  DEFAULT_PARAMS,
+  listReturnPath,
+  MAX_SEARCH_LENGTH,
+  nextOrdering,
+  parseListParams,
+  toQueryString,
+} from "./params";
 
 const parse = (qs: string) => parseListParams(new URLSearchParams(qs));
 
@@ -45,5 +53,53 @@ describe("nextOrdering", () => {
   it("the same column flips", () => {
     expect(nextOrdering("last_name", "name")).toBe("-last_name");
     expect(nextOrdering("-created_at", "created")).toBe("created_at");
+  });
+});
+
+describe("listReturnPath (?from= becomes an href: no open redirect)", () => {
+  it("keeps the list's page, search and ordering", () => {
+    expect(listReturnPath("/customers?search=ali&page=2&ordering=last_name")).toBe(
+      "/customers?search=ali&ordering=last_name&page=2",
+    );
+    expect(listReturnPath("/customers")).toBe("/customers");
+  });
+
+  it.each([
+    null,
+    "",
+    "//evil.com",
+    "//evil.com/customers",
+    "/\\evil.com",
+    "\\\\evil.com",
+    "https://evil.com/customers",
+    "http://localhost:3000/customers",
+    "javascript:alert(1)",
+    "customers",
+    "/customers/12",
+    "/customers/new",
+    "/customersx",
+    "/login?next=/customers",
+    "/customers/../admin",
+    "/%2F%2Fevil.com",
+  ])("%j → /customers", (from) => {
+    expect(listReturnPath(from)).toBe("/customers");
+  });
+
+  it("drops anything but the list params", () => {
+    expect(listReturnPath("/customers?page=2&next=https://evil.com&ordering=password#x")).toBe(
+      "/customers?page=2",
+    );
+  });
+});
+
+describe("customerHref", () => {
+  it("leaves the default list view out of the URL", () => {
+    expect(customerHref(7, DEFAULT_PARAMS)).toBe("/customers/7");
+  });
+
+  it("round-trips the list state through ?from=", () => {
+    const list = { page: 2, search: "ali rezaei", ordering: "last_name" as const };
+    const from = new URL(customerHref(7, list), "http://x").searchParams.get("from");
+    expect(listReturnPath(from)).toBe(`/customers${toQueryString(list)}`);
   });
 });

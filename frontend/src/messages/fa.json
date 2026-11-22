@@ -47,6 +47,7 @@
   },
   "customers": {
     "title": "مشتریان",
+    "backToList": "بازگشت به مشتریان",
     "new": "مشتری جدید",
     "tableCaption": "مشتریان",
     "columns": {

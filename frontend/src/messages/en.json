@@ -47,6 +47,7 @@
   },
   "customers": {
     "title": "Customers",
+    "backToList": "Back to customers",
     "new": "New customer",
     "tableCaption": "Customers",
     "columns": {

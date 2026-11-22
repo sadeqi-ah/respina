@@ -22,7 +22,9 @@ import {
 import { AppShell } from "@/features/shell/AppShell";
 import { ApiError } from "@/lib/api-error";
 
+import { RETURN_PARAM } from "../params";
 import { useCustomer } from "../queries";
+import { BackToCustomersLink } from "./BackToCustomersLink";
 import { CustomerDetails } from "./CustomerDetails";
 
 function useDetailParams() {
@@ -30,13 +32,18 @@ function useDetailParams() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useMemo(() => parseDetailParams(new URLSearchParams(searchParams)), [searchParams]);
+  // The list view this page was opened from; kept across tab and filter changes for the back link.
+  const from = searchParams.get(RETURN_PARAM);
   const setParams = useCallback(
     (patch: Partial<DetailParams>) => {
       // A new filter or tab starts at page 1.
       const next = { ...params, ...patch, page: patch.page ?? 1 };
-      router.replace(`${pathname}${toDetailQuery(next)}`, { scroll: false });
+      const query = new URLSearchParams(toDetailQuery(next));
+      if (from) query.set(RETURN_PARAM, from);
+      const qs = query.toString();
+      router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
     },
-    [params, pathname, router],
+    [from, params, pathname, router],
   );
   return [params, setParams] as const;
 }
@@ -78,6 +85,7 @@ export function CustomerDetailView({ id }: { id: number }) {
   return (
     <AppShell
       title={customer.data?.full_name ?? t("title")}
+      headerLeading={<BackToCustomersLink />}
       status={customer.data ? ts("count", { count: customer.data.services_count }) : undefined}
       statusTone="neutral"
       headerActions={addAction}
