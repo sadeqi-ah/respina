@@ -17,6 +17,7 @@ import type { Customer } from "@/types/api";
 
 import { PendingSkeleton, SkeletonLine } from "@/components/states/PendingSkeleton";
 
+import { usePrefetchCustomer } from "../prefetch";
 import { customerHref, PAGE_SIZE, sortStateOf, type ListParams, type SortKey } from "../params";
 
 type SortState = ReturnType<typeof sortStateOf>;
@@ -40,6 +41,7 @@ export function CustomerTable({ customers, params, onSort }: Props) {
   const t = useTranslations("customers");
   const format = useFormatter();
   const sort = sortStateOf(params.ordering);
+  const prefetchProps = usePrefetchCustomer();
 
   const copyEmail = async (customer: Customer) => {
     try {
@@ -65,6 +67,7 @@ export function CustomerTable({ customers, params, onSort }: Props) {
               <div className="flex min-w-0 flex-col gap-0.5">
                 <Link
                   href={customerHref(customer.id, params)}
+                  {...prefetchProps(customer.id)}
                   className="touch-target relative max-w-full font-medium outline-none hover:underline focus-visible:underline"
                 >
                   {/* Truncate inside: overflow-hidden on the link would clip its touch-target hit area. */}

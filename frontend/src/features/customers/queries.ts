@@ -11,7 +11,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import { ApiError } from "@/lib/api-error";
-import type { Customer } from "@/types/api";
+import type { Customer, Page } from "@/types/api";
 
 import { createCustomer, getCustomer, listCustomers } from "./api";
 import { parseListParams, toQueryString, type ListParams } from "./params";
@@ -24,15 +24,33 @@ export const customerKeys = {
   detail: (id: number) => ["customers", "detail", id] as const,
 };
 
-/** A customer already in the cache, without fetching: its detail entry. */
+/** A customer's row in the most recently fetched cached list page that has it, with that page's age. */
+function rowFromLists(queryClient: QueryClient, id: number) {
+  let found: { customer: Customer; updatedAt: number } | undefined;
+  for (const [key, page] of queryClient.getQueriesData<Page<Customer>>({ queryKey: customerKeys.lists })) {
+    const customer = page?.results.find((row) => row.id === id);
+    const updatedAt = queryClient.getQueryState(key)?.dataUpdatedAt ?? 0;
+    if (customer && (!found || updatedAt > found.updatedAt)) found = { customer, updatedAt };
+  }
+  return found;
+}
+
+/** A customer already in the cache, without fetching: its detail entry, else its row in a list. */
 export function cachedCustomer(queryClient: QueryClient, id: number): Customer | undefined {
-  return queryClient.getQueryData<Customer>(customerKeys.detail(id));
+  return (
+    queryClient.getQueryData<Customer>(customerKeys.detail(id)) ?? rowFromLists(queryClient, id)?.customer
+  );
 }
 
 export function useCustomer(id: number) {
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: customerKeys.detail(id),
     queryFn: ({ signal }) => getCustomer(id, signal),
+    // Opened from the list: its row is the same Customer, so the page renders at once. The row
+    // counts as data as old as its list page, so a stale one is refetched in the background.
+    initialData: () => rowFromLists(queryClient, id)?.customer,
+    initialDataUpdatedAt: () => rowFromLists(queryClient, id)?.updatedAt,
     // A 404/403 won't change on retry; show not-found or the error right away.
     retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 2,
   });

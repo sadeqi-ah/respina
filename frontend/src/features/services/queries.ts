@@ -28,7 +28,10 @@ export const serviceKeys = {
   history: (serviceId: number) => ["services", "history", serviceId] as const,
 };
 
-export function useServices(customerId: number, filters: ServiceFilters) {
+export function useServices(customerId: number, { status, type, page }: ServiceFilters) {
+  // Exactly the filter fields: callers pass the page's whole URL state (with its tab), which must not
+  // end up in the key, or a prefetch of the same list would miss it.
+  const filters: ServiceFilters = { status, type, page };
   return useQuery({
     queryKey: serviceKeys.list(customerId, filters),
     queryFn: ({ signal }) => listServices(customerId, filters, signal),
