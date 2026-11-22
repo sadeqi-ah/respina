@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -40,13 +40,17 @@ export function LoginForm({ next }: { next: string | null }) {
   const te = useTranslations("errors");
   const router = useRouter();
   const queryClient = useQueryClient();
+  // Signed in and on the way: the dashboard can take a while on a slow network, and the form must
+  // not look ready for another try meanwhile.
+  const [navigating, startNavigation] = useTransition();
   const schema = useMemo(() => makeLoginSchema(tv), [tv]);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
   });
-  const { errors, isSubmitting } = form.formState;
+  const { errors } = form.formState;
+  const isSubmitting = form.formState.isSubmitting || navigating;
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
@@ -54,8 +58,10 @@ export function LoginForm({ next }: { next: string | null }) {
       // Who signed in (the shell needs it anyway): go straight home instead of through "/", so
       // the dashboard's first frame is already the right page with the right shell.
       const me = await queryClient.fetchQuery(meQuery).catch(() => null);
-      router.replace(next ? safeNext(next) : me ? homePath(me) : "/");
-      router.refresh();
+      startNavigation(() => {
+        router.replace(next ? safeNext(next) : me ? homePath(me) : "/");
+        router.refresh();
+      });
     } catch (error) {
       const apiError = error instanceof ApiError ? error : ApiError.network(error);
       applyApiError(apiError, FIELDS, form.setError, { errors: te, validation: tv });
