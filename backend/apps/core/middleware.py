@@ -1,4 +1,6 @@
+import logging
 import re
+import time
 import uuid
 
 from .request_context import request_id_var
@@ -25,3 +27,37 @@ class RequestIDMiddleware:
             request_id_var.reset(token)
         response[HEADER] = request_id
         return response
+
+
+request_logger = logging.getLogger("apps.core.request")
+
+
+class RequestTimingMiddleware:
+    """Logs one "request" line per request, same shape as the Go service's `logging` middleware.
+
+    Sits directly after RequestIDMiddleware, so it runs inside that middleware's try/finally and
+    the request ID is still set when the line is written. Logs the path only: no query string,
+    headers or body.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        start = time.perf_counter()
+        status = 500  # if get_response raises, the request ends as a server error
+        try:
+            response = self.get_response(request)
+            status = response.status_code
+            return response
+        finally:
+            request_logger.info(
+                "request",
+                extra={
+                    "method": request.method,
+                    "path": request.path,
+                    "status": status,
+                    "duration_ms": int((time.perf_counter() - start) * 1000),
+                    "request_id": getattr(request, "request_id", None),
+                },
+            )
