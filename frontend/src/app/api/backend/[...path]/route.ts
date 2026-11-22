@@ -2,10 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { toDjangoPath } from "@/lib/bff/path";
 import { sendWithRefresh } from "@/lib/bff/refresh";
-import { requestIdFrom } from "@/lib/bff/request-id";
 import { ACCESS_COOKIE, clearAuthCookies, REFRESH_COOKIE, setAuthCookies } from "@/lib/server/cookies";
 import { djangoFetch, DjangoUnavailable, sharedRefreshTokens } from "@/lib/server/django";
 import { envelope } from "@/lib/server/errors";
+import { logLine, withRequestLog } from "@/lib/server/request-log";
 
 /**
  * BFF proxy: /api/backend/<path> → Django /api/v1/<path>/ with the access token from the
@@ -14,8 +14,8 @@ import { envelope } from "@/lib/server/errors";
 async function proxy(
   request: NextRequest,
   ctx: RouteContext<"/api/backend/[...path]">,
+  requestId: string,
 ): Promise<NextResponse> {
-  const requestId = requestIdFrom(request.headers.get("x-request-id"));
   const { path } = await ctx.params;
   const djangoPath = toDjangoPath(path);
   if (!djangoPath) return envelope(404, "not_found", "Not found.", requestId);
@@ -50,9 +50,7 @@ async function proxy(
     });
   } catch (error) {
     if (error instanceof DjangoUnavailable) {
-      console.error(
-        JSON.stringify({ level: "error", msg: "django unavailable", requestId, error: error.message }),
-      );
+      logLine("ERROR", "bff.django", `django unavailable: ${error.message}`, requestId);
       return envelope(503, "dependency_unavailable", "The API is unavailable.", requestId);
     }
     throw error;
@@ -73,8 +71,10 @@ async function proxy(
   return response;
 }
 
-export const GET = proxy;
-export const POST = proxy;
-export const PUT = proxy;
-export const PATCH = proxy;
-export const DELETE = proxy;
+const handler = withRequestLog(proxy);
+
+export const GET = handler;
+export const POST = handler;
+export const PUT = handler;
+export const PATCH = handler;
+export const DELETE = handler;
