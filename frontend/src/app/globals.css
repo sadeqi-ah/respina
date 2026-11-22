@@ -100,7 +100,6 @@
 
 :root {
   /* Palette: Obsidian UI dashboard shell (components/block/dashboard-shell.css). */
-  --app-font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --background: #ffffff;
   --foreground: #161616;
   --card: #ffffff;
@@ -140,7 +139,16 @@
   --radius: 0.625rem;
 }
 
-:root:lang(fa) {
+/*
+ * The next/font variables (--font-geist, --font-vazirmatn) are set by classes on <body>, not
+ * <html>: next-themes owns <html>'s class. So the font stack is declared on <body>, where
+ * those variables resolve, and everything (portals included) renders inside it.
+ */
+body {
+  --app-font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+}
+
+body:lang(fa) {
   --app-font-sans: "Yekan Bakh", var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -187,10 +195,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
+    @apply bg-background font-sans text-foreground;
   }
 }
 
