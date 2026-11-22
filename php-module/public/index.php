@@ -36,7 +36,7 @@ try {
         return $pdo ??= Database::connect($config);
     };
     $customers = static fn (): CustomerRepository => new CustomerRepository($db());
-    $services = static fn (): ServiceRepository => new ServiceRepository($db());
+    $services = static fn (): ServiceRepository => new ServiceRepository($db(), $config->dbLockTimeout, $request->requestId);
 
     $pages = new PageController($verifier, $customers, $services);
     $api = new ApiController($verifier, $customers, $services);

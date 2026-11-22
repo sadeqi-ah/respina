@@ -192,6 +192,32 @@ final class RepositoryTest extends TestCase
         (new ServiceRepository($this->module))->changeStatus($this->serviceB, null, ServiceStatus::Suspended, '', $this->ownerOfA());
     }
 
+    public function testStatusChangeBehindAHeldRowLockIs409ServiceBusy(): void
+    {
+        $id = $this->servicesA[0];
+        // A second connection holds the row lock, as a concurrent status change would.
+        $this->owner->beginTransaction();
+        $this->owner->prepare('SELECT id FROM services WHERE id = :id FOR UPDATE')->execute(['id' => $id]);
+
+        $started = microtime(true);
+        try {
+            (new ServiceRepository($this->module, '200ms', 'lock-test'))
+                ->changeStatus($id, null, ServiceStatus::Suspended, '', $this->staff());
+            self::fail('waited past the held lock');
+        } catch (HttpException $e) {
+            self::assertSame(409, $e->status);
+            self::assertSame('service_busy', $e->errorCode);
+        } finally {
+            $this->owner->rollBack();
+        }
+
+        self::assertLessThan(2.0, microtime(true) - $started);
+        self::assertFalse($this->module->inTransaction());
+        self::assertSame(0, $this->logCount($id));
+        // set_config(..., true) is SET LOCAL: nothing left on the connection afterwards.
+        self::assertSame('0', $this->module->query('SHOW lock_timeout')->fetchColumn());
+    }
+
     // --- the php_module role can do only what it needs -----------------------------------------
 
     /**

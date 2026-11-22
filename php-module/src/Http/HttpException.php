@@ -48,6 +48,11 @@ final class HttpException extends RuntimeException
         return new self(401, 'token_invalid', 'The token is invalid or expired.', [], self::BEARER);
     }
 
+    public static function serviceBusy(): self
+    {
+        return new self(409, 'service_busy', 'The service is being changed by another request. Try again.');
+    }
+
     /**
      * @param array<string, list<array{code: string, message: string}>> $details
      */
