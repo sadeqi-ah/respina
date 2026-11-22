@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/states/EmptyState";
 import { ErrorState } from "@/components/states/ErrorState";
 import { TableSkeleton } from "@/components/states/TableSkeleton";
 import { useMe } from "@/features/auth/queries";
-import { AppShell } from "@/features/shell/AppShell";
+import { useShellConfig } from "@/features/shell/shell-config";
 
 import { nextOrdering } from "../params";
 import { useCustomers, useListParams } from "../queries";
@@ -65,13 +65,11 @@ export function CustomersView() {
       </div>
     );
 
-  return (
-    <AppShell
-      title={t("title")}
-      filters={<CustomerSearch value={params.search} onChange={(search) => setParams({ search })} />}
-      toolbarActions={newCustomer}
-    >
-      <div className="@container/table flex min-h-full flex-col">{body}</div>
-    </AppShell>
-  );
+  useShellConfig({
+    title: t("title"),
+    filters: <CustomerSearch value={params.search} onChange={(search) => setParams({ search })} />,
+    toolbarActions: newCustomer,
+  });
+
+  return <div className="@container/table flex min-h-full flex-col">{body}</div>;
 }

@@ -7,7 +7,7 @@ import { dashboardButtonVariants } from "@/components/block/dashboard-shell";
 import { EmptyState } from "@/components/states/EmptyState";
 import { LoadingState } from "@/components/states/LoadingState";
 import { useMe } from "@/features/auth/queries";
-import { AppShell } from "@/features/shell/AppShell";
+import { useShellConfig } from "@/features/shell/shell-config";
 
 import { CustomerForm } from "./CustomerForm";
 
@@ -38,9 +38,7 @@ export function NewCustomerView() {
       </div>
     );
 
-  return (
-    <AppShell title={t("new")}>
-      <div className="@container/page flex min-h-full flex-col">{body}</div>
-    </AppShell>
-  );
+  useShellConfig({ title: t("new") });
+
+  return <div className="@container/page flex min-h-full flex-col">{body}</div>;
 }

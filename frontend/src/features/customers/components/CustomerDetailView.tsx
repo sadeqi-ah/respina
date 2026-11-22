@@ -19,7 +19,7 @@ import {
   type DetailParams,
   type Tab,
 } from "@/features/services/params";
-import { AppShell } from "@/features/shell/AppShell";
+import { useShellConfig } from "@/features/shell/shell-config";
 import { useReturnFocus } from "@/hooks/use-return-focus";
 import { ApiError } from "@/lib/api-error";
 
@@ -95,22 +95,22 @@ export function CustomerDetailView({ id }: { id: number }) {
       />
     );
 
+  useShellConfig({
+    title: customer.data?.full_name ?? t("title"),
+    headerLeading: <BackToCustomersLink />,
+    status: customer.data ? ts("count", { count: customer.data.services_count }) : undefined,
+    statusTone: "neutral",
+    headerActions: headerAddAction,
+    tabs: TABS.map((tab) => ({ value: tab, label: t(`tabs.${tab}`) })),
+    tab: params.tab,
+    onTabChange: (tab) => setParams({ tab: tab as Tab, status: null, type: null }),
+    // The filters only touch the URL, so they are there from the start and the toolbar never pops in.
+    filters:
+      params.tab === "services" ? <ServiceFilterMenus filters={params} onChange={setParams} /> : undefined,
+  });
+
   return (
-    <AppShell
-      title={customer.data?.full_name ?? t("title")}
-      headerLeading={<BackToCustomersLink />}
-      status={customer.data ? ts("count", { count: customer.data.services_count }) : undefined}
-      statusTone="neutral"
-      headerActions={headerAddAction}
-      tabs={TABS.map((tab) => ({ value: tab, label: t(`tabs.${tab}`) }))}
-      tab={params.tab}
-      onTabChange={(tab) => setParams({ tab: tab as Tab, status: null, type: null })}
-      filters={
-        params.tab === "services" && customer.data ? (
-          <ServiceFilterMenus filters={params} onChange={setParams} />
-        ) : undefined
-      }
-    >
+    <>
       <div className="@container/table flex min-h-full flex-col">{body}</div>
       {isStaff && (
         <AddServiceDialog
@@ -120,6 +120,6 @@ export function CustomerDetailView({ id }: { id: number }) {
           onCloseAutoFocus={addFocus.onCloseAutoFocus}
         />
       )}
-    </AppShell>
+    </>
   );
 }

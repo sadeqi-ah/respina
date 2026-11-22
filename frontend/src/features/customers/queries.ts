@@ -1,10 +1,17 @@
 "use client";
 
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import { ApiError } from "@/lib/api-error";
+import type { Customer } from "@/types/api";
 
 import { createCustomer, getCustomer, listCustomers } from "./api";
 import { parseListParams, toQueryString, type ListParams } from "./params";
@@ -16,6 +23,11 @@ export const customerKeys = {
   list: (params: ListParams) => ["customers", "list", params] as const,
   detail: (id: number) => ["customers", "detail", id] as const,
 };
+
+/** A customer already in the cache, without fetching: its detail entry. */
+export function cachedCustomer(queryClient: QueryClient, id: number): Customer | undefined {
+  return queryClient.getQueryData<Customer>(customerKeys.detail(id));
+}
 
 export function useCustomer(id: number) {
   return useQuery({
