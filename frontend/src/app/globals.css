@@ -209,3 +209,24 @@ body:lang(fa) {
   animation: none;
   mix-blend-mode: normal;
 }
+
+/*
+ * Loading skeletons (PendingSkeleton): invisible for --skeleton-delay, so quick loads show none,
+ * then a short fade in. The backwards fill holds opacity 0 during the delay, server render included.
+ */
+@keyframes skeleton-reveal {
+  from {
+    opacity: 0;
+  }
+}
+
+.skeleton-reveal {
+  animation: skeleton-reveal 150ms ease-out var(--skeleton-delay, 150ms) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Still delayed, but it appears at once instead of fading. */
+  .skeleton-reveal {
+    animation-duration: 1ms;
+  }
+}

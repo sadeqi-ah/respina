@@ -2,12 +2,11 @@
 
 import { AddCircle } from "@duo-icons/react";
 import { useTranslations } from "next-intl";
-import { notFound, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { notFound, usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, type MouseEvent } from "react";
 
 import { DashboardButton } from "@/components/block/dashboard-shell";
 import { ErrorState } from "@/components/states/ErrorState";
-import { LoadingState } from "@/components/states/LoadingState";
 import { useMe } from "@/features/auth/queries";
 import { AddServiceDialog } from "@/features/services/components/AddServiceDialog";
 import { ServiceFilterMenus } from "@/features/services/components/ServiceFilterMenus";
@@ -19,18 +18,19 @@ import {
   type DetailParams,
   type Tab,
 } from "@/features/services/params";
-import { AppShell } from "@/features/shell/AppShell";
+import { useShellConfig } from "@/features/shell/shell-config";
+import { useMinimumPending } from "@/hooks/use-minimum-pending";
 import { useReturnFocus } from "@/hooks/use-return-focus";
 import { ApiError } from "@/lib/api-error";
+import { replaceUrl } from "@/lib/replace-url";
 
 import { RETURN_PARAM } from "../params";
 import { useCustomer } from "../queries";
 import { BackToCustomersLink } from "./BackToCustomersLink";
-import { CustomerDetails } from "./CustomerDetails";
+import { CustomerDetails, CustomerDetailsSkeleton } from "./CustomerDetails";
 
 function useDetailParams() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
   const params = useMemo(() => parseDetailParams(new URLSearchParams(searchParams)), [searchParams]);
   // The list view this page was opened from; kept across tab and filter changes for the back link.
@@ -42,9 +42,9 @@ function useDetailParams() {
       const query = new URLSearchParams(toDetailQuery(next));
       if (from) query.set(RETURN_PARAM, from);
       const qs = query.toString();
-      router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+      replaceUrl(`${pathname}${qs ? `?${qs}` : ""}`);
     },
-    [from, params, pathname, router],
+    [from, params, pathname],
   );
   return [params, setParams] as const;
 }
@@ -62,6 +62,7 @@ export function CustomerDetailView({ id }: { id: number }) {
     setAdding(true);
   };
   const isStaff = me?.role === "staff"; // UX only: the API enforces it
+  const loadingCustomer = useMinimumPending(customer.isPending);
 
   // Invisible and missing customers are both 404 from the API (scoping never leaks with a 403).
   if (customer.error instanceof ApiError && customer.error.status === 404) notFound();
@@ -81,13 +82,21 @@ export function CustomerDetailView({ id }: { id: number }) {
   ) : null;
 
   let body;
-  if (customer.isPending) body = <LoadingState />;
-  else if (customer.isError) body = <ErrorState error={customer.error} onRetry={() => customer.refetch()} />;
-  else if (params.tab === "details") body = <CustomerDetails customer={customer.data} />;
+  if (customer.isError) body = <ErrorState error={customer.error} onRetry={() => customer.refetch()} />;
+  else if (params.tab === "details")
+    body =
+      loadingCustomer || customer.isPending ? (
+        <CustomerDetailsSkeleton />
+      ) : (
+        <CustomerDetails customer={customer.data} />
+      );
   else
+    // The services load alongside the customer rather than after it.
     body = (
       <ServicesTab
         customerId={id}
+        servicesCount={customer.data?.services_count}
+        customerPending={customer.isPending}
         filters={params}
         onFiltersChange={setParams}
         isStaff={isStaff}
@@ -95,22 +104,22 @@ export function CustomerDetailView({ id }: { id: number }) {
       />
     );
 
+  useShellConfig({
+    title: customer.data?.full_name ?? t("title"),
+    headerLeading: <BackToCustomersLink />,
+    status: customer.data ? ts("count", { count: customer.data.services_count }) : undefined,
+    statusTone: "neutral",
+    headerActions: headerAddAction,
+    tabs: TABS.map((tab) => ({ value: tab, label: t(`tabs.${tab}`) })),
+    tab: params.tab,
+    onTabChange: (tab) => setParams({ tab: tab as Tab, status: null, type: null }),
+    // The filters only touch the URL, so they are there from the start and the toolbar never pops in.
+    filters:
+      params.tab === "services" ? <ServiceFilterMenus filters={params} onChange={setParams} /> : undefined,
+  });
+
   return (
-    <AppShell
-      title={customer.data?.full_name ?? t("title")}
-      headerLeading={<BackToCustomersLink />}
-      status={customer.data ? ts("count", { count: customer.data.services_count }) : undefined}
-      statusTone="neutral"
-      headerActions={headerAddAction}
-      tabs={TABS.map((tab) => ({ value: tab, label: t(`tabs.${tab}`) }))}
-      tab={params.tab}
-      onTabChange={(tab) => setParams({ tab: tab as Tab, status: null, type: null })}
-      filters={
-        params.tab === "services" && customer.data ? (
-          <ServiceFilterMenus filters={params} onChange={setParams} />
-        ) : undefined
-      }
-    >
+    <>
       <div className="@container/table flex min-h-full flex-col">{body}</div>
       {isStaff && (
         <AddServiceDialog
@@ -120,6 +129,6 @@ export function CustomerDetailView({ id }: { id: number }) {
           onCloseAutoFocus={addFocus.onCloseAutoFocus}
         />
       )}
-    </AppShell>
+    </>
   );
 }

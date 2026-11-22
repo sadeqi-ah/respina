@@ -7,25 +7,37 @@ import { DashboardButton } from "@/components/block/dashboard-shell";
 import { Pagination } from "@/components/Pagination";
 import { EmptyState } from "@/components/states/EmptyState";
 import { ErrorState } from "@/components/states/ErrorState";
-import { TableSkeleton } from "@/components/states/TableSkeleton";
+import { useMinimumPending } from "@/hooks/use-minimum-pending";
 import { useReturnFocus } from "@/hooks/use-return-focus";
 import type { Service } from "@/types/api";
 
 import type { ServiceFilters } from "../params";
 import { useServices } from "../queries";
 import { ServiceStatusToggle } from "./ServiceStatusToggle";
-import { ServiceTable } from "./ServiceTable";
+import { serviceSkeletonRows, ServiceTable, ServiceTableSkeleton } from "./ServiceTable";
 import { StatusHistorySheet } from "./StatusHistorySheet";
 
 type Props = {
   customerId: number;
+  /** The customer's total, when known: the first unfiltered page's skeleton gets that many rows. */
+  servicesCount?: number;
+  /** While the customer itself still loads, a failed list waits: the customer may turn out a 404. */
+  customerPending?: boolean;
   filters: ServiceFilters;
   onFiltersChange: (patch: Partial<ServiceFilters>) => void;
   isStaff: boolean;
   addAction: React.ReactNode;
 };
 
-export function ServicesTab({ customerId, filters, onFiltersChange, isStaff, addAction }: Props) {
+export function ServicesTab({
+  customerId,
+  servicesCount,
+  customerPending = false,
+  filters,
+  onFiltersChange,
+  isStaff,
+  addAction,
+}: Props) {
   const t = useTranslations("services");
   const query = useServices(customerId, filters);
   const [toggling, setToggling] = useState<Service | null>(null);
@@ -33,9 +45,11 @@ export function ServicesTab({ customerId, filters, onFiltersChange, isStaff, add
   const historyFocus = useReturnFocus();
   const [historyOf, setHistoryOf] = useState<Service | null>(null);
   const filtered = filters.status !== null || filters.type !== null;
+  const loading = useMinimumPending(query.isPending || (query.isError && customerPending));
+  const rows = serviceSkeletonRows(filtered || filters.page > 1 ? undefined : servicesCount);
 
   let body;
-  if (query.isPending) body = <TableSkeleton />;
+  if (loading || query.isPending) body = <ServiceTableSkeleton rows={rows} />;
   else if (query.isError) body = <ErrorState error={query.error} onRetry={() => query.refetch()} />;
   else if (query.data.count === 0 && filtered)
     body = (

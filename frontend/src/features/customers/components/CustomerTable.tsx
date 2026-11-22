@@ -15,7 +15,12 @@ import {
 import { cn } from "@/lib/utils";
 import type { Customer } from "@/types/api";
 
-import { customerHref, sortStateOf, type ListParams, type SortKey } from "../params";
+import { PendingSkeleton, SkeletonLine } from "@/components/states/PendingSkeleton";
+
+import { usePrefetchCustomer } from "../prefetch";
+import { customerHref, PAGE_SIZE, sortStateOf, type ListParams, type SortKey } from "../params";
+
+type SortState = ReturnType<typeof sortStateOf>;
 
 // Adapted from Obsidian's dashboard-shell-page table (registry: @obsidian/dashboard-shell-page). Columns hide as the table's own container
 // narrows, in this order: created → services → phone → email. The name is always shown.
@@ -36,6 +41,7 @@ export function CustomerTable({ customers, params, onSort }: Props) {
   const t = useTranslations("customers");
   const format = useFormatter();
   const sort = sortStateOf(params.ordering);
+  const prefetchProps = usePrefetchCustomer();
 
   const copyEmail = async (customer: Customer) => {
     try {
@@ -49,33 +55,7 @@ export function CustomerTable({ customers, params, onSort }: Props) {
   return (
     <table className="w-full border-collapse text-start text-sm">
       <caption className="sr-only">{t("tableCaption")}</caption>
-      {/* Each header cell is pinned to the top of the shell's scroll area and draws its own top and
-          bottom rules as inset shadows. Collapsed borders belong to the table, not the row: they
-          scroll away with it and Chromium leaves a 1px hole above a stuck header where they were. */}
-      <thead className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_1px_0_var(--obsidian-dashboard-shell-border),inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]">
-        <tr className="text-xs text-(--obsidian-dashboard-shell-text-subtle)">
-          <SortHeader label={t("columns.name")} sortKey="name" sort={sort} onSort={onSort} />
-          <th scope="col" className={cn(cell, hideBelow.email, "font-normal")}>
-            {t("columns.email")}
-          </th>
-          <th scope="col" className={cn(cell, hideBelow.phone, "font-normal")}>
-            {t("columns.phone")}
-          </th>
-          <th scope="col" className={cn(cell, hideBelow.services, "text-end font-normal")}>
-            {t("columns.services")}
-          </th>
-          <SortHeader
-            label={t("columns.created")}
-            sortKey="created"
-            sort={sort}
-            onSort={onSort}
-            className={hideBelow.created}
-          />
-          <th scope="col" className="w-10 py-2.5 ps-0 pe-3 @lg/table:pe-4">
-            <span className="sr-only">{t("columns.actions")}</span>
-          </th>
-        </tr>
-      </thead>
+      <CustomerTableHead sort={sort} onSort={onSort} />
       {/* Anything scrolled into view (keyboard focus, find-in-page) stops below the pinned header. */}
       <tbody className="[&_*]:scroll-mt-12">
         {customers.map((customer) => (
@@ -87,6 +67,7 @@ export function CustomerTable({ customers, params, onSort }: Props) {
               <div className="flex min-w-0 flex-col gap-0.5">
                 <Link
                   href={customerHref(customer.id, params)}
+                  {...prefetchProps(customer.id)}
                   className="touch-target relative max-w-full font-medium outline-none hover:underline focus-visible:underline"
                 >
                   {/* Truncate inside: overflow-hidden on the link would clip its touch-target hit area. */}
@@ -168,6 +149,86 @@ export function CustomerTable({ customers, params, onSort }: Props) {
   );
 }
 
+const headClassName =
+  "[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-(--obsidian-dashboard-shell-background) [&_th]:shadow-[inset_0_1px_0_var(--obsidian-dashboard-shell-border),inset_0_-1px_0_var(--obsidian-dashboard-shell-border)]";
+
+// Each header cell is pinned to the top of the shell's scroll area and draws its own top and
+// bottom rules as inset shadows. Collapsed borders belong to the table, not the row: they
+// scroll away with it and Chromium leaves a 1px hole above a stuck header where they were.
+function CustomerTableHead({ sort, onSort }: { sort: SortState; onSort: (key: SortKey) => void }) {
+  const t = useTranslations("customers");
+  return (
+    <thead className={headClassName}>
+      <tr className="text-xs text-(--obsidian-dashboard-shell-text-subtle)">
+        <SortHeader label={t("columns.name")} sortKey="name" sort={sort} onSort={onSort} />
+        <th scope="col" className={cn(cell, hideBelow.email, "font-normal")}>
+          {t("columns.email")}
+        </th>
+        <th scope="col" className={cn(cell, hideBelow.phone, "font-normal")}>
+          {t("columns.phone")}
+        </th>
+        <th scope="col" className={cn(cell, hideBelow.services, "text-end font-normal")}>
+          {t("columns.services")}
+        </th>
+        <SortHeader
+          label={t("columns.created")}
+          sortKey="created"
+          sort={sort}
+          onSort={onSort}
+          className={hideBelow.created}
+        />
+        <th scope="col" className="w-10 py-2.5 ps-0 pe-3 @lg/table:pe-4">
+          <span className="sr-only">{t("columns.actions")}</span>
+        </th>
+      </tr>
+    </thead>
+  );
+}
+
+/**
+ * The list while it loads: the real header and placeholder rows built from the same cells, so each
+ * row has the height of a real one and nothing moves when the customers arrive.
+ */
+export function CustomerTableSkeleton({ params, rows = PAGE_SIZE }: { params: ListParams; rows?: number }) {
+  return (
+    <PendingSkeleton kind="customer-table">
+      <table className="w-full border-collapse text-start text-sm">
+        <CustomerTableHead sort={sortStateOf(params.ordering)} onSort={() => {}} />
+        <tbody>
+          {Array.from({ length: rows }, (_, i) => (
+            <tr key={i} className="border-b border-(--obsidian-dashboard-shell-border) last:border-b-0">
+              <td className={cell}>
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <SkeletonLine className={i % 2 ? "w-28" : "w-36"} />
+                  <SkeletonLine lineClassName="text-xs @md/table:hidden" className="h-2.5 w-40" />
+                </div>
+              </td>
+              <td className={cn(cell, hideBelow.email)}>
+                <SkeletonLine className="w-44" />
+              </td>
+              <td className={cn(cell, hideBelow.phone)}>
+                <SkeletonLine className="w-24" />
+              </td>
+              <td className={cn(cell, hideBelow.services)}>
+                <SkeletonLine className="ms-auto w-6" />
+              </td>
+              <td className={cn(cell, hideBelow.created)}>
+                <SkeletonLine className="w-20" />
+              </td>
+              <td className="w-10 py-2.5 ps-0 pe-3 @lg/table:pe-4">
+                {/* The actions button sets a row's height (with the font's line, in every script): keep an invisible one. */}
+                <DashboardButton variant="ghost" size="icon" tabIndex={-1} className="invisible size-7">
+                  <Ellipsis aria-hidden />
+                </DashboardButton>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </PendingSkeleton>
+  );
+}
+
 function SortHeader({
   label,
   sortKey,
@@ -177,7 +238,7 @@ function SortHeader({
 }: {
   label: string;
   sortKey: SortKey;
-  sort: { key: SortKey; direction: "asc" | "desc" };
+  sort: SortState;
   onSort: (key: SortKey) => void;
   className?: string;
 }) {

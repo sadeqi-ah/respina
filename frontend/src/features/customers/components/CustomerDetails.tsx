@@ -1,6 +1,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
+import { PendingSkeleton, SkeletonLine } from "@/components/states/PendingSkeleton";
 import type { Customer } from "@/types/api";
 
 /** The Details tab: a plain description list. */
@@ -29,6 +30,27 @@ export function CustomerDetails({ customer }: { customer: Customer }) {
       ),
     },
   ];
+  return <DetailsList rows={rows} />;
+}
+
+const DETAIL_FIELDS = ["firstName", "lastName", "email", "phone", "services", "created"] as const;
+
+/** The Details tab while the customer loads: the real labels, a placeholder line for each value. */
+export function CustomerDetailsSkeleton() {
+  const t = useTranslations("customers.details");
+  return (
+    <PendingSkeleton kind="customer-details">
+      <DetailsList
+        rows={DETAIL_FIELDS.map((field, i) => ({
+          label: t(field),
+          value: <SkeletonLine className={i % 2 ? "w-32" : "w-44"} />,
+        }))}
+      />
+    </PendingSkeleton>
+  );
+}
+
+function DetailsList({ rows }: { rows: { label: string; value: ReactNode }[] }) {
   return (
     <dl className="@container/details grid border-t border-(--obsidian-dashboard-shell-border) text-sm">
       {rows.map(({ label, value }) => (

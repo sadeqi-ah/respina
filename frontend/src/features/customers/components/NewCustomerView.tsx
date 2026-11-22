@@ -5,11 +5,11 @@ import Link from "next/link";
 
 import { dashboardButtonVariants } from "@/components/block/dashboard-shell";
 import { EmptyState } from "@/components/states/EmptyState";
-import { LoadingState } from "@/components/states/LoadingState";
 import { useMe } from "@/features/auth/queries";
-import { AppShell } from "@/features/shell/AppShell";
+import { useShellConfig } from "@/features/shell/shell-config";
 
 import { CustomerForm } from "./CustomerForm";
+import { NewCustomerSkeleton } from "./PageSkeletons";
 
 export function NewCustomerView() {
   const t = useTranslations("customers");
@@ -17,7 +17,7 @@ export function NewCustomerView() {
   const { data: me, isPending } = useMe();
 
   let body;
-  if (isPending) body = <LoadingState />;
+  if (isPending) body = <NewCustomerSkeleton />;
   // UX only: Django answers 403 for non-staff anyway, and the form would show that message.
   else if (me?.role !== "staff")
     body = (
@@ -38,9 +38,7 @@ export function NewCustomerView() {
       </div>
     );
 
-  return (
-    <AppShell title={t("new")}>
-      <div className="@container/page flex min-h-full flex-col">{body}</div>
-    </AppShell>
-  );
+  useShellConfig({ title: t("new") });
+
+  return <div className="@container/page flex min-h-full flex-col">{body}</div>;
 }

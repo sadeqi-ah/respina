@@ -8,13 +8,13 @@ import { DashboardButton, dashboardButtonVariants } from "@/components/block/das
 import { Pagination } from "@/components/Pagination";
 import { EmptyState } from "@/components/states/EmptyState";
 import { ErrorState } from "@/components/states/ErrorState";
-import { TableSkeleton } from "@/components/states/TableSkeleton";
 import { useMe } from "@/features/auth/queries";
-import { AppShell } from "@/features/shell/AppShell";
+import { useShellConfig } from "@/features/shell/shell-config";
+import { useMinimumPending } from "@/hooks/use-minimum-pending";
 
 import { nextOrdering } from "../params";
 import { useCustomers, useListParams } from "../queries";
-import { CustomerTable } from "./CustomerTable";
+import { CustomerTable, CustomerTableSkeleton } from "./CustomerTable";
 import { CustomerSearch } from "./CustomerToolbar";
 
 export function CustomersView() {
@@ -23,6 +23,7 @@ export function CustomersView() {
   const [params, setParams] = useListParams();
   const query = useCustomers(params);
   const isStaff = me?.role === "staff"; // UX only: the API enforces who may create
+  const loading = useMinimumPending(query.isPending);
 
   const newCustomer = isStaff ? (
     <Link href="/customers/new" className={dashboardButtonVariants({ variant: "primary", size: "sm" })}>
@@ -32,7 +33,7 @@ export function CustomersView() {
   ) : null;
 
   let body;
-  if (query.isPending) body = <TableSkeleton />;
+  if (loading || query.isPending) body = <CustomerTableSkeleton params={params} />;
   else if (query.isError) body = <ErrorState error={query.error} onRetry={() => query.refetch()} />;
   else if (query.data.count === 0 && params.search)
     body = (
@@ -65,13 +66,11 @@ export function CustomersView() {
       </div>
     );
 
-  return (
-    <AppShell
-      title={t("title")}
-      filters={<CustomerSearch value={params.search} onChange={(search) => setParams({ search })} />}
-      toolbarActions={newCustomer}
-    >
-      <div className="@container/table flex min-h-full flex-col">{body}</div>
-    </AppShell>
-  );
+  useShellConfig({
+    title: t("title"),
+    filters: <CustomerSearch value={params.search} onChange={(search) => setParams({ search })} />,
+    toolbarActions: newCustomer,
+  });
+
+  return <div className="@container/table flex min-h-full flex-col">{body}</div>;
 }
