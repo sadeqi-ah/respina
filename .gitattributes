@@ -1,0 +1,8 @@
+# Normalize text files; scripts that run inside Linux containers must stay LF even on Windows
+# checkouts (core.autocrlf=true would otherwise turn them into CRLF and break the shebang).
+* text=auto
+*.sh text eol=lf
+Makefile text eol=lf
+.env.example text eol=lf
+*.png binary
+*.woff2 binary
