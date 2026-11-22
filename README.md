@@ -34,7 +34,8 @@ flowchart LR
 
 ## Prerequisites
 
-- **Docker** with Compose v2, and **GNU Make**. That's all you need to run the stack.
+- **Docker** with Compose v2, and **GNU Make**. That's all you need to run the stack. No Make
+  (e.g. on Windows)? See [Without make](#without-make-eg-windows).
 - `openssl` (for `make keys`) and `jq` (for `make smoke`).
 - Optional, to work on a component outside Docker: Python 3.12 + [uv](https://docs.astral.sh/uv/),
   Node.js 22, Go 1.25+, PHP 8.3 + Composer. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
@@ -60,6 +61,31 @@ make env keys up seed
 | Customers | `customer1@example.com` … `customer3@example.com` | `SEED_CUSTOMER_PASSWORD` |
 
 Stop with `make down` (keeps the database volume); `make help` lists every target.
+
+### Without make (e.g. Windows)
+
+The Makefile only wraps a few commands, so the stack runs without it. On Windows, use Docker
+Desktop and run these from **Git Bash** (it ships with Git for Windows and includes `openssl`),
+in the repository root:
+
+```bash
+# make env: create .env (skip if you already have one)
+[ -f .env ] || cp .env.example .env
+
+# make keys: RS256 keypair for JWT (skip if secrets/ already has both files)
+mkdir -p secrets
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out secrets/jwt_private.pem
+openssl pkey -in secrets/jwt_private.pem -pubout -out secrets/jwt_public.pem
+
+# make up: build and start, return when every service is healthy
+docker compose up -d --build --wait --wait-timeout 180
+
+# make seed: demo data
+docker compose --profile seed run --rm seed
+```
+
+Stop with `docker compose down`. Shell scripts are pinned to LF line endings in `.gitattributes`,
+so a Windows checkout runs the same as on Linux or macOS.
 
 ## Service URLs
 
