@@ -648,7 +648,8 @@ export function DashboardShell({
   const renderHeader = (tabList?: ReactNode) => (
     <header className="shrink-0">
       <div className="flex items-center justify-between gap-2 px-4 py-3.5">
-        <div className="flex min-w-0 items-center gap-2">
+        {/* Stretched to the row: its box stays put whether or not a leading control is there yet. */}
+        <div className="flex min-w-0 items-center gap-2 self-stretch">
           <DashboardButton
             ref={menuButtonRef}
             variant="secondary"

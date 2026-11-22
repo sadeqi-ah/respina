@@ -65,7 +65,8 @@ export function AppShell({ headerActions, className, ...props }: ShellProps & { 
       // min-h-full, which would let h-full resolve to auto and the whole page scroll instead.
       // dvh follows the mobile browser's collapsing URL bar.
       className={cn("h-dvh", className)}
-      brand={{ name: t("common.appName"), description: me ? t(`common.roles.${me.role}`) : undefined }}
+      // A no-break space holds the role line until it is known, so the navigation below never moves.
+      brand={{ name: t("common.appName"), description: me ? t(`common.roles.${me.role}`) : "\u00a0" }}
       navigation={navigation}
       activeItemId={activeItemId}
       linkComponent={Link}
