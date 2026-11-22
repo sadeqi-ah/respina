@@ -186,3 +186,14 @@
     @apply font-sans;
   }
 }
+
+/*
+ * Theme switch: ThemeToggle grows the new theme as a circle from the click point
+ * (::view-transition-new(root) animated from script). The default cross-fade is turned off so
+ * only the circle moves, and blending is off so the two snapshots don't mix colours.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}

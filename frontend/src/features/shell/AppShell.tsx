@@ -23,6 +23,7 @@ import {
 } from "@/components/block/dashboard-shell";
 import { useMe } from "@/features/auth/queries";
 import { setLocale } from "@/i18n/actions";
+import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { locales } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
@@ -76,6 +77,7 @@ export function AppShell({ headerActions, className, ...props }: ShellProps & { 
       headerActions={
         <>
           {headerActions}
+          <ThemeToggle variant="shell" />
           <UserMenu email={me?.email} />
         </>
       }
